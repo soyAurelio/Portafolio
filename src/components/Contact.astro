@@ -1,0 +1,54 @@
+---
+export interface Props {
+  title: string;
+  description: string;
+  orText: string;
+  emailText: string;
+  lang: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  email?: string;
+}
+
+const {
+  title,
+  description,
+  orText,
+  emailText,
+  lang,
+  githubUrl = 'https://github.com/',
+  linkedinUrl = 'https://linkedin.com/in/',
+  email = 'marcoantoniosbr@gmail.com',
+} = Astro.props;
+---
+
+<section id="contact" class="opacity-0 mt-20">
+  <h2 class="text-text font-semibold text-[14px]">{title}</h2>
+  <p class="text-gray font-normal text-[12px] mt-2">
+    {description}
+    <a
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-text hover:underline tooltip"
+      href={githubUrl}
+      data-tooltip={githubUrl.replace('https://', '')}>GitHub</a
+    >
+    ·
+    <a
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-text hover:underline tooltip"
+      href={linkedinUrl}
+      data-tooltip={linkedinUrl.replace('https://', '')}>LinkedIn</a
+    >
+    <span class="mx-2">{orText}</span>
+    {emailText}
+    <a
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-text hover:underline tooltip"
+      href={`mailto:${email}`}
+      data-tooltip={`mailto:${email}`}>{email}</a
+    >
+  </p>
+</section>

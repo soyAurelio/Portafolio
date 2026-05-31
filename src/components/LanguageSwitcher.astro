@@ -1,0 +1,36 @@
+---
+export interface Props {
+  currentLang: 'es' | 'en';
+  /** Path to the same page in the other language */
+  esPath?: string;
+  enPath?: string;
+}
+
+const { currentLang, esPath = '/', enPath = '/en/' } = Astro.props;
+---
+
+<span class="inline-flex items-center space-x-1">
+  <a
+    href={esPath}
+    hreflang="es"
+    class={currentLang === 'es'
+      ? 'text-text text-[12px]'
+      : 'text-gray hover:text-text text-[12px] tooltip'}
+    data-tooltip="Español"
+    aria-current={currentLang === 'es' ? 'page' : undefined}
+  >
+    ES
+  </a>
+  <span class="text-gray text-[10px] select-none" aria-hidden="true">·</span>
+  <a
+    href={enPath}
+    hreflang="en"
+    class={currentLang === 'en'
+      ? 'text-text text-[12px]'
+      : 'text-gray hover:text-text text-[12px] tooltip'}
+    data-tooltip="English"
+    aria-current={currentLang === 'en' ? 'page' : undefined}
+  >
+    EN
+  </a>
+</span>

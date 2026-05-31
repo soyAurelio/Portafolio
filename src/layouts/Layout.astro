@@ -1,0 +1,187 @@
+---
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  canonicalURL: string;
+  currentLocale: string;
+}
+
+const {
+  title,
+  description,
+  ogImage = '/og/home.png',
+  canonicalURL,
+  currentLocale,
+} = Astro.props;
+
+const altLocale = currentLocale === 'es' ? 'en' : 'es';
+const altPath = currentLocale === 'es' ? '/en/' : '/';
+const siteUrl = 'https://soyaurelio.dev';
+const author = 'Marco Aurelio';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: author,
+  url: siteUrl,
+  sameAs: [
+    'https://github.com/soyAurelio',
+    'https://linkedin.com/in/',
+  ],
+  jobTitle: 'Backend Developer',
+  description: currentLocale === 'es'
+    ? 'Backend developer especializado en APIs, automatización, IA aplicada y arquitectura de sistemas.'
+    : 'Backend developer specialized in APIs, automation, applied AI, and systems architecture.',
+  knowsAbout: [
+    'Java', 'PHP', 'Laravel', 'SQL', 'Docker', 'AWS', 'Linux',
+    'WordPress', 'Python', 'Artificial Intelligence', 'API Architecture',
+    'Backend Development', 'SEO',
+  ],
+  alumniOf: [
+    { '@type': 'CollegeOrUniversity', name: 'El Cañaveral — Móstoles' },
+    { '@type': 'CollegeOrUniversity', name: 'Senati — Lima, Perú' },
+  ],
+  worksFor: {
+    '@type': 'Organization',
+    name: 'e-SORT',
+    url: 'https://www.e-sort.net',
+  },
+};
+---
+
+<!doctype html>
+<html lang={currentLocale} class="w-full h-full flex sm:justify-center">
+  <head>
+    <!-- Theme detection (blocking, before paint) -->
+    <script is:inline>
+      const theme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (theme === 'dark' || (!theme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
+
+    <!-- Global Metadata -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="alternate" hreflang={currentLocale} href={canonicalURL} />
+    <link rel="alternate" hreflang={altLocale} href={siteUrl + altPath} />
+    <link rel="alternate" hreflang="x-default" href={siteUrl + '/'} />
+
+    <!-- Title & Description -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={siteUrl + ogImage} />
+    <meta property="og:image:secure_url" content={siteUrl + ogImage} />
+    <meta name="author" content={author} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={siteUrl + ogImage} />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+
+    <!-- Sitemap -->
+    <link rel="sitemap" href="/sitemap-index.xml" />
+  </head>
+
+  <body
+    class="text-text bg-bg font-inter flex flex-col max-w-[550px] w-full h-full px-4 md:px-0"
+  >
+    <main class="grow">
+      <slot />
+    </main>
+
+    <!-- Section entrance animation -->
+    <script>
+      addEventListener('load', () => {
+        document.querySelectorAll('section').forEach((el, i) => {
+          el.animate(
+            {
+              opacity: [0, 1],
+              transform: ['translateY(40px)', 'translateY(0)'],
+              filter: ['blur(20px)', 'blur(0)'],
+            },
+            {
+              duration: 700,
+              easing: 'ease-out',
+              delay: i * 300,
+              fill: 'forwards',
+            }
+          );
+        });
+
+        const aside = document.querySelector('aside');
+        if (aside) {
+          aside.animate(
+            {
+              opacity: [0, 1],
+              transform: ['translateY(40px)', 'translateY(0)'],
+              filter: ['blur(20px)', 'blur(0)'],
+            },
+            {
+              duration: 700,
+              easing: 'ease-out',
+              delay: document.querySelectorAll('section').length * 300,
+              fill: 'forwards',
+            }
+          );
+        }
+      });
+    </script>
+
+    <!-- Click ripple effect -->
+    <script>
+      addEventListener('click', (e) => {
+        if (e.target.closest('a, button')) return;
+        const div = document.createElement('div');
+        div.style.cssText = `
+          position: fixed;
+          top: ${e.clientY}px;
+          left: ${e.clientX}px;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--text);
+          pointer-events: none;
+          transform: translate(-50%, -50%);
+          z-index: 9999;
+        `;
+        document.body.appendChild(div);
+        div
+          .animate(
+            {
+              transform: ['translate(-50%, -50%) scale(1)', 'translate(-50%, -50%) scale(2.5)'],
+              opacity: [1, 0],
+            },
+            {
+              duration: 250,
+              easing: 'ease-out',
+              fill: 'forwards',
+            }
+          )
+          .finished.then(() => div.remove());
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,92 @@
+---
+export interface Post {
+  slug: string;
+  title: string;
+  date: string;
+  readTime: number;
+}
+
+export interface Props {
+  title: string;
+  description: string;
+  allText: string;
+  readTimeSuffix: string;
+  posts: Post[];
+  lang: string;
+}
+
+const { title, description, allText, readTimeSuffix, posts, lang } = Astro.props;
+const postsPath = lang === 'es' ? '/posts' : `/${lang}/posts`;
+---
+
+<section id="posts" class="opacity-0 mt-14">
+  <a href={postsPath} class="group inline-flex items-center space-x-1 hover:text-text">
+    <h2 class="text-text font-semibold text-[14px]">
+      {title}
+    </h2>
+    <!-- Arrow up-right icon -->
+    <svg
+      class="text-gray group-hover:text-text"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <line x1="4.5" y1="11.5" x2="11.5" y2="4.5"></line>
+      <polyline points="4.5 4.5 11.5 4.5 11.5 11.5"></polyline>
+    </svg>
+  </a>
+  <p class="text-gray font-normal text-[12px]">
+    {description}
+  </p>
+  <ul class="mt-2">
+    {posts.map((post) => (
+      <li class="py-4 border-b-[0.1px] border-border">
+        <a href={`/${lang === 'es' ? '' : lang + '/'}posts/${post.slug}`} class="group flex items-center justify-between">
+          <div class="flex items-center xs:space-x-4">
+            <p class="hidden xs:block text-gray group-hover:text-text font-medium text-[10px]">
+              <time datetime={post.date}>
+                {new Date(post.date).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </time>
+            </p>
+            <h4 class="font-medium group-hover:font-semibold text-text text-[12px]">
+              {post.title}
+            </h4>
+          </div>
+          <p class="hidden sm:block text-gray group-hover:text-text font-medium text-[10px]">
+            {post.readTime} {readTimeSuffix}
+          </p>
+        </a>
+      </li>
+    ))}
+  </ul>
+  <a href={postsPath} class="flex mt-4 justify-end">
+    <div class="group flex items-center space-x-1">
+      <p class="text-gray group-hover:text-text text-end font-normal text-[12px]">
+        {allText}
+      </p>
+      <svg
+        class="text-gray group-hover:text-text"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="4.5" y1="11.5" x2="11.5" y2="4.5"></line>
+        <polyline points="4.5 4.5 11.5 4.5 11.5 11.5"></polyline>
+      </svg>
+    </div>
+  </a>
+</section>

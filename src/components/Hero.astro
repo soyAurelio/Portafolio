@@ -1,0 +1,39 @@
+---
+import TypewriterName from './TypewriterName.astro';
+
+export interface Props {
+  greeting: string;
+  bioLine1: string;
+  bioLine2: string;
+}
+
+const { greeting, bioLine1, bioLine2 } = Astro.props;
+---
+
+<section id="hero" class="opacity-0 mt-36">
+  <!-- Profile picture -->
+  <img
+    src="/images/profile.svg"
+    alt="Marco Aurelio"
+    width="80"
+    height="80"
+    class="rounded-full mb-6 border border-border"
+    decoding="async"
+    loading="eager"
+  />
+
+  <p class="text-text font-semibold text-[16px]">
+    <TypewriterName
+      scopeId="hero"
+      greeting={greeting}
+      staticPrefix="Marco "
+      names={["Antonio,", "Aurelio,"]}
+    />
+  </p>
+  <p class="text-gray font-normal text-[12px] mt-3">
+    {bioLine1}
+  </p>
+  <p class="text-gray font-normal text-[12px] mt-3">
+    {bioLine2}
+  </p>
+</section>

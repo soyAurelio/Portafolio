@@ -1,15 +1,15 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Hero from '../components/Hero.astro';
-import Experience from '../components/Experience.astro';
-import Projects from '../components/Projects.astro';
-import Education from '../components/Education.astro';
-import Stack from '../components/Stack.astro';
-import Skills from '../components/Skills.astro';
-import Posts from '../components/Posts.astro';
-import Contact from '../components/Contact.astro';
-import Footer from '../components/Footer.astro';
-import { useTranslations, getLangFromUrl } from '../i18n/utils';
+import Layout from '../../layouts/Layout.astro';
+import Hero from '../../components/Hero.astro';
+import Experience from '../../components/Experience.astro';
+import Projects from '../../components/Projects.astro';
+import Education from '../../components/Education.astro';
+import Stack from '../../components/Stack.astro';
+import Skills from '../../components/Skills.astro';
+import Posts from '../../components/Posts.astro';
+import Contact from '../../components/Contact.astro';
+import Footer from '../../components/Footer.astro';
+import { useTranslations, getLangFromUrl } from '../../i18n/utils';
 
 const url = new URL(Astro.request.url);
 const lang = getLangFromUrl(url);
@@ -43,26 +43,26 @@ const experiences = [
 
 const projects = [
   {
-    name: 'API REST de tareas',
-    description: 'API con autenticación JWT, relaciones entre modelos y despliegue en Docker. Ciclo completo de una app backend en producción.',
+    name: 'Task REST API',
+    description: 'API with JWT authentication, model relationships, and Docker deployment. Full backend app lifecycle in production.',
     tags: ['Laravel', 'PHP', 'MySQL', 'Docker'],
     url: '#',
   },
   {
-    name: 'Catalogación IA de imágenes',
-    description: 'Sistema de clasificación automática de imágenes usando IA. Etiquetado semántico y búsqueda por contenido visual.',
-    tags: ['Python', 'IA', 'SQL', 'CMS'],
+    name: 'AI Image Cataloging',
+    description: 'Automatic image classification system using AI. Semantic tagging and visual content-based search.',
+    tags: ['Python', 'AI', 'SQL', 'CMS'],
     url: '#',
   },
   {
-    name: 'Scraper con pipeline ETL',
-    description: 'Extrae, transforma y carga datos de fuentes públicas en base de datos relacional. Ejecutable vía cron en Linux.',
+    name: 'ETL Scraper Pipeline',
+    description: 'Extracts, transforms, and loads data from public sources into a relational database. Runnable via cron on Linux.',
     tags: ['PHP', 'SQL', 'Linux'],
     url: '#',
   },
   {
-    name: 'Deploy con AWS + Docker',
-    description: 'Infraestructura con EC2, RDS y contenedores Docker. nginx como reverse proxy y CI/CD básico.',
+    name: 'AWS + Docker Deploy',
+    description: 'Infrastructure with EC2, RDS, and Docker containers. nginx reverse proxy and basic CI/CD.',
     tags: ['AWS', 'Docker', 'Linux', 'nginx'],
     url: '#',
   },
@@ -85,40 +85,40 @@ const education = [
 const stackItems = [
   'Java', 'PHP / Laravel', 'SQL (MySQL / PG)', 'Docker',
   'AWS (EC2, RDS)', 'Linux', 'HTML · CSS · JS', 'WordPress',
-  'Git / GitHub', 'Python (IA/ML)',
+  'Git / GitHub', 'Python (AI/ML)',
 ];
 
 const softSkills = [
-  'Resolución de problemas',
-  'Proactividad',
-  'Trabajo en equipo',
-  'Adaptabilidad',
-  'Gestión del tiempo',
-  'Pensamiento crítico',
+  'Problem solving',
+  'Proactivity',
+  'Teamwork',
+  'Adaptability',
+  'Time management',
+  'Critical thinking',
 ];
 
 const posts = [
   {
-    slug: 'ia-catalogacion-imagenes',
-    title: 'Catalogación automática de imágenes con IA: de la idea a producción',
+    slug: 'ai-image-cataloging',
+    title: 'AI-powered image cataloging: from idea to production',
     date: '2026-04-20',
     readTime: 7,
   },
   {
-    slug: 'docker-para-desarrolladores',
-    title: 'Docker para desarrolladores backend: del cero al contenedor',
+    slug: 'docker-for-backend-devs',
+    title: 'Docker for backend developers: from zero to container',
     date: '2025-11-15',
     readTime: 7,
   },
   {
-    slug: 'api-rest-laravel',
-    title: 'Cómo estructurar una API REST en Laravel desde cero',
+    slug: 'structuring-laravel-rest-api',
+    title: 'How to structure a REST API in Laravel from scratch',
     date: '2025-05-10',
     readTime: 5,
   },
 ];
 
-const canonicalURL = 'https://soyaurelio.dev/';
+const canonicalURL = 'https://soyaurelio.dev/en/';
 ---
 
 <Layout

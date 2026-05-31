@@ -1,0 +1,91 @@
+---
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import TypewriterName from './TypewriterName.astro';
+
+export interface Props {
+  themeLabel: string;
+  themeTooltip: string;
+  versionTooltip: string;
+  lang: string;
+}
+
+const { themeLabel, themeTooltip, versionTooltip, lang } = Astro.props;
+const esPath = '/';
+const enPath = '/en/';
+---
+
+<footer class="flex justify-between mt-20 pb-10">
+  <div class="flex flex-auto">
+    <p class="text-text font-normal text-[12px]">
+      &copy; 2025
+      <a
+        href="/colophon"
+        class="text-text text-[12px] hover:underline tooltip"
+        data-tooltip={lang === 'es' ? '¿querés ver el colofón?' : 'wanna view colophon?'}
+      >
+        <TypewriterName
+          scopeId="footer"
+          staticPrefix="Marco "
+          names={["Antonio", "Aurelio"]}
+          startDelay={2200}
+          typeSpeed={80}
+          deleteSpeed={40}
+          pauseShort={3200}
+          pauseLong={4500}
+        />
+      </a>
+    </p>
+  </div>
+  <div class="flex items-center space-x-4">
+    <LanguageSwitcher currentLang={lang as 'es' | 'en'} {esPath} {enPath} />
+
+    <!-- Theme toggle -->
+    <div class="flex items-center space-x-1">
+      <p class="text-text font-normal text-[12px]">{themeLabel}</p>
+      <button
+        id="theme-toggle"
+        class="text-[12px] leading-[20px] underline cursor-pointer select-none bg-transparent border-none p-0 text-inherit tooltip"
+        aria-label="Cambiar tema"
+        data-tooltip={themeTooltip}
+      >
+        light
+      </button>
+    </div>
+
+    <!-- Version -->
+    <a
+      href="/changelog"
+      class="text-text text-[12px] hover:underline tooltip"
+      data-tooltip={versionTooltip}>v1.0.0</a
+    >
+  </div>
+</footer>
+
+<script>
+  const toggle = document.getElementById('theme-toggle');
+  if (toggle) {
+    const applyTheme = (theme: string) => {
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+      toggle.textContent = theme;
+    };
+
+    let savedTheme = localStorage.getItem('theme');
+    if (!savedTheme) {
+      savedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    applyTheme(savedTheme);
+
+    toggle.addEventListener('click', () => {
+      const newTheme = toggle.textContent === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', newTheme);
+      applyTheme(newTheme);
+    });
+
+    document.addEventListener('astro:after-swap', () => {
+      const theme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const effectiveTheme = theme ?? (prefersDark ? 'dark' : 'light');
+      document.documentElement.classList.toggle('dark', effectiveTheme === 'dark');
+    });
+  }
+</script>

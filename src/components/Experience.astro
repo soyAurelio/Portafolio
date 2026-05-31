@@ -1,0 +1,39 @@
+---
+export interface ExperienceEntry {
+  role: string;
+  company: string;
+  date: string;
+  descriptions: string[];
+}
+
+export interface Props {
+  title: string;
+  entries: ExperienceEntry[];
+}
+
+const { title, entries } = Astro.props;
+---
+
+<section id="experience" class="opacity-0 mt-14">
+  <h2 class="text-text font-semibold text-[14px]">{title}</h2>
+
+  <div class="mt-4 space-y-8">
+    {entries.map((entry) => (
+      <div>
+        <div class="flex items-baseline justify-between flex-wrap gap-x-2">
+          <h3 class="text-text font-medium text-[13px]">{entry.role}</h3>
+          <span class="text-gray font-normal text-[10px] whitespace-nowrap">{entry.date}</span>
+        </div>
+        <p class="text-gray font-normal text-[11px] mt-0.5">{entry.company}</p>
+        <ul class="mt-2 space-y-1">
+          {entry.descriptions.map((desc) => (
+            <li class="text-gray font-normal text-[12px] leading-[18px] flex gap-2">
+              <span class="text-border shrink-0 mt-[6px] block w-1 h-1 rounded-full bg-gray"></span>
+              <span>{desc}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+</section>
