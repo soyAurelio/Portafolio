@@ -89,7 +89,9 @@ const sectionClass = compact
 
       var container = document.createElement('div');
       container.className = 'relative bg-bg border border-border rounded-xl shadow-lg flex flex-col';
-      container.style.cssText = 'max-width: 850px; width: calc(100vw - 2rem); height: calc(100vh - 2rem); overflow: hidden;';
+      var isDesktop = window.innerWidth >= 640;
+      container.style.cssText = 'max-width: 850px; width: calc(100vw - 2rem); max-height: ' + (isDesktop ? 'calc(100vh - 8rem)' : '90vh') + '; overflow: hidden;'
+        + (isDesktop ? ' height: calc(100vh - 2rem);' : '');
       var header = document.createElement('div');
       header.className = 'flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 border-b border-border shrink-0';
 
@@ -117,19 +119,16 @@ const sectionClass = compact
       header.appendChild(titleEl);
       header.appendChild(headerActions);
 
-      // Use Google Docs Viewer to bypass Cloudflare's forced Content-Disposition: attachment
-      var pdfUrl = window.location.origin + cvPath;
-      var viewerSrc = 'https://docs.google.com/viewer?url=' + encodeURIComponent(pdfUrl) + '&embedded=true';
-
-      var viewer = document.createElement('iframe');
-      viewer.src = viewerSrc;
-      viewer.className = 'w-full border-0';
-      viewer.style.cssText = 'flex: 1; min-height: 0; width: 100%;';
-      viewer.setAttribute('title', 'CV Preview');
-      viewer.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups');
+      var iframe = document.createElement('iframe');
+      iframe.src = cvPath + '#view=Fit';
+      iframe.className = 'w-full border-0';
+      iframe.style.cssText = isDesktop
+        ? 'flex: 1; min-height: 0; max-width: 100%; overflow: hidden;'
+        : 'aspect-ratio: 1/1.414; max-width: 100%; overflow: hidden;';
+      iframe.setAttribute('title', 'CV Preview');
 
       container.appendChild(header);
-      container.appendChild(viewer);
+      container.appendChild(iframe);
       backdrop.appendChild(container);
       document.body.appendChild(backdrop);
       document.body.style.overflow = 'hidden';
