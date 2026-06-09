@@ -68,6 +68,7 @@ const jsonLd = {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/images/profile.png" />
+    <link rel="apple-touch-icon" href="/images/profile.png" />
     <meta name="generator" content={Astro.generator} />
 
     <!-- Canonical URL -->
@@ -114,6 +115,7 @@ const jsonLd = {
   </head>
 
   <body class="text-text bg-bg font-inter flex flex-col max-w-137.5 w-full px-4 md:px-0 mx-auto min-h-screen">
+    <h1 class="sr-only">{title}</h1>
     <main class="grow">
       <slot />
     </main>
