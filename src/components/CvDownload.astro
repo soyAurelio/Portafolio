@@ -117,20 +117,16 @@ const sectionClass = compact
       header.appendChild(titleEl);
       header.appendChild(headerActions);
 
-      // <object> handles PDF preview better than <iframe> on mobile browsers
-      var viewer = document.createElement('object');
-      viewer.data = cvPath + '#view=Fit';
-      viewer.type = 'application/pdf';
+      // Use Google Docs Viewer to bypass Cloudflare's forced Content-Disposition: attachment
+      var pdfUrl = window.location.origin + cvPath;
+      var viewerSrc = 'https://docs.google.com/viewer?url=' + encodeURIComponent(pdfUrl) + '&embedded=true';
+
+      var viewer = document.createElement('iframe');
+      viewer.src = viewerSrc;
       viewer.className = 'w-full border-0';
       viewer.style.cssText = 'flex: 1; min-height: 0; width: 100%;';
       viewer.setAttribute('title', 'CV Preview');
-
-      // Fallback: shown when browser can't render PDF inline (e.g., old mobile browsers)
-      var fallback = document.createElement('div');
-      fallback.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:0.75rem;padding:2rem;text-align:center;';
-      fallback.innerHTML = '<p style="color:var(--text);font-size:13px;margin:0">' + downloadText + ' el CV para verlo</p>'
-        + '<a href="' + cvPath + '" download style="color:var(--text);font-size:14px;font-weight:600;text-decoration:underline">' + downloadText + '</a>';
-      viewer.appendChild(fallback);
+      viewer.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups');
 
       container.appendChild(header);
       container.appendChild(viewer);
