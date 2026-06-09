@@ -1,0 +1,180 @@
+---
+export interface Props {
+  title?: string;
+  description?: string;
+  previewText: string;
+  downloadText: string;
+  closeText: string;
+  formatText: string;
+  cvPath?: string;
+  lang: string;
+  compact?: boolean;
+}
+
+const {
+  title,
+  description,
+  previewText,
+  downloadText,
+  closeText,
+  formatText,
+  cvPath = '/images/cv.pdf',
+  compact = false,
+} = Astro.props;
+
+const sectionClass = compact
+  ? 'inline-flex items-center'
+  : 'opacity-0 mt-14';
+---
+{compact ? (
+  <button
+    id="cv-preview-btn"
+    data-cv-path={cvPath}
+    data-download-text={downloadText}
+    data-close-text={closeText}
+    class="group inline-flex items-center space-x-1.5 hover:text-text bg-transparent border border-border rounded-md px-3 py-1.5 cursor-pointer"
+    aria-label={`${previewText} (${formatText})`}
+  >
+    <svg class="text-gray group-hover:text-text" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 8s3-6 6-6 6 6 6 6-3 6-6 6-6-6-6-6z"></path>
+      <circle cx="8" cy="8" r="2"></circle>
+    </svg>
+    <span class="text-gray group-hover:text-text font-medium text-[12px]">
+      {previewText}
+    </span>
+  </button>
+) : (
+<section id="cv" class={sectionClass}>
+  <h2 class="text-text font-semibold text-[14px]">{title}</h2>
+  <p class="text-gray font-normal text-[12px]">{description}</p>
+
+  <button
+    id="cv-preview-btn"
+    data-cv-path={cvPath}
+    data-download-text={downloadText}
+    data-close-text={closeText}
+    class="group inline-flex items-center space-x-1 mt-3 hover:text-text bg-transparent border-none p-0 cursor-pointer"
+    aria-label={`${previewText} (${formatText})`}
+  >
+    <span class="text-gray group-hover:text-text font-medium text-[12px]">
+      {previewText}
+    </span>
+    <span class="text-gray group-hover:text-text text-[10px] border border-border rounded-sm px-1.5 py-px leading-none">
+      {formatText}
+    </span>
+    <svg class="text-gray group-hover:text-text" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 8s3-6 6-6 6 6 6 6-3 6-6 6-6-6-6-6z"></path>
+      <circle cx="8" cy="8" r="2"></circle>
+    </svg>
+  </button>
+</section>
+)}
+
+<script is:inline>
+  (function() {
+    var btn = document.getElementById('cv-preview-btn');
+    if (!btn) return;
+
+    var cvPath = btn.getAttribute('data-cv-path') || '/cv.pdf';
+    var downloadText = btn.getAttribute('data-download-text') || 'Descargar';
+    var closeText = btn.getAttribute('data-close-text') || 'Cerrar';
+    var modal = null;
+
+    btn.addEventListener('click', function() {
+      if (modal) return;
+
+      var backdrop = document.createElement('div');
+      backdrop.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
+      backdrop.style.cssText = 'background: rgba(0,0,0,0.6);';
+
+      var container = document.createElement('div');
+      container.className = 'relative bg-bg border border-border rounded-xl shadow-lg flex flex-col';
+      var isDesktop = window.innerWidth >= 640;
+      container.style.cssText = 'max-width: 850px; width: calc(100vw - 2rem); max-height: ' + (isDesktop ? 'calc(100vh - 8rem)' : '90vh') + '; overflow: hidden;'
+        + (isDesktop ? ' height: calc(100vh - 2rem);' : '');
+      var header = document.createElement('div');
+      header.className = 'flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 border-b border-border shrink-0';
+
+      var titleEl = document.createElement('span');
+      titleEl.className = 'text-text font-medium text-[13px]';
+      titleEl.textContent = 'CV — Marco Antonio';
+
+      var headerActions = document.createElement('div');
+      headerActions.className = 'flex items-center space-x-3';
+
+      var downloadLink = document.createElement('a');
+      downloadLink.href = cvPath;
+      downloadLink.download = '';
+      downloadLink.className = 'text-gray hover:text-text text-[12px] hover:underline';
+      downloadLink.textContent = downloadText;
+
+      var closeBtn = document.createElement('button');
+      closeBtn.className = 'text-gray hover:text-text text-[18px] leading-none bg-transparent border-none p-0 cursor-pointer';
+      closeBtn.innerHTML = '&times;';
+      closeBtn.setAttribute('aria-label', closeText);
+      closeBtn.addEventListener('click', closeModal);
+
+      headerActions.appendChild(downloadLink);
+      headerActions.appendChild(closeBtn);
+      header.appendChild(titleEl);
+      header.appendChild(headerActions);
+
+      var iframe = document.createElement('iframe');
+      iframe.src = cvPath + '#view=Fit';
+      iframe.className = 'w-full border-0';
+      iframe.style.cssText = isDesktop
+        ? 'flex: 1; min-height: 0; max-width: 100%; overflow: hidden;'
+        : 'aspect-ratio: 1/1.414; max-width: 100%; overflow: hidden;';
+      iframe.setAttribute('title', 'CV Preview');
+
+      container.appendChild(header);
+      container.appendChild(iframe);
+      backdrop.appendChild(container);
+      document.body.appendChild(backdrop);
+      document.body.style.overflow = 'hidden';
+
+      modal = backdrop;
+
+      container.animate(
+        { opacity: [0, 1], transform: ['scale(0.95) translateY(10px)', 'scale(1) translateY(0)'] },
+        { duration: 200, easing: 'ease-out', fill: 'forwards' }
+      );
+      backdrop.animate(
+        { opacity: [0, 1] },
+        { duration: 150, easing: 'ease-out', fill: 'forwards' }
+      );
+
+      backdrop.addEventListener('click', function(e) {
+        if (e.target === backdrop) closeModal();
+      });
+
+      function onKey(e) {
+        if (e.key === 'Escape') closeModal();
+      }
+      document.addEventListener('keydown', onKey);
+      backdrop.__onKey = onKey;
+    });
+
+    function closeModal() {
+      if (!modal) return;
+      var keyHandler = modal.__onKey;
+      if (keyHandler) document.removeEventListener('keydown', keyHandler);
+
+      var container = modal.firstElementChild;
+      Promise.all([
+        container.animate(
+          { opacity: [1, 0], transform: ['scale(1) translateY(0)', 'scale(0.95) translateY(10px)'] },
+          { duration: 120, easing: 'ease-in', fill: 'forwards' }
+        ).finished,
+        modal.animate(
+          { opacity: [1, 0] },
+          { duration: 100, easing: 'ease-in', fill: 'forwards' }
+        ).finished,
+      ]).then(function() {
+        if (modal) modal.remove();
+        modal = null;
+        document.body.style.overflow = '';
+      });
+    }
+  })();
+</script>

@@ -3,120 +3,35 @@ import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import Experience from '../components/Experience.astro';
 import Projects from '../components/Projects.astro';
-import Education from '../components/Education.astro';
 import Stack from '../components/Stack.astro';
-import Skills from '../components/Skills.astro';
-import Posts from '../components/Posts.astro';
-import Contact from '../components/Contact.astro';
 import Footer from '../components/Footer.astro';
-import { useTranslations, getLangFromUrl } from '../i18n/utils';
+import { useTranslations, getLangFromUrl, getAltPath } from '../i18n/utils';
+import { projects as projectData } from '../data/projects';
+import { stackItems } from '../data/stack';
+import { experiences as experienceData } from '../data/experience';
 
 const url = new URL(Astro.request.url);
 const lang = getLangFromUrl(url);
 const t = useTranslations(lang);
 
-const experiences = [
-  {
-    role: t('experience.esort.role'),
-    company: t('experience.esort.company'),
-    date: t('experience.esort.date'),
-    descriptions: [
-      t('experience.esort.desc1'),
-      t('experience.esort.desc2'),
-      t('experience.esort.desc3'),
-      t('experience.esort.desc4'),
-      t('experience.esort.desc5'),
-    ],
-  },
-  {
-    role: t('experience.bodegas.role'),
-    company: t('experience.bodegas.company'),
-    date: t('experience.bodegas.date'),
-    descriptions: [
-      t('experience.bodegas.desc1'),
-      t('experience.bodegas.desc2'),
-      t('experience.bodegas.desc3'),
-      t('experience.bodegas.desc4'),
-    ],
-  },
-];
+const altEsPath = getAltPath(url, lang, 'es');
+const altEnPath = getAltPath(url, lang, 'en');
 
-const projects = [
-  {
-    name: 'API REST de tareas',
-    description: 'API con autenticación JWT, relaciones entre modelos y despliegue en Docker. Ciclo completo de una app backend en producción.',
-    tags: ['Laravel', 'PHP', 'MySQL', 'Docker'],
-    url: '#',
-  },
-  {
-    name: 'Catalogación IA de imágenes',
-    description: 'Sistema de clasificación automática de imágenes usando IA. Etiquetado semántico y búsqueda por contenido visual.',
-    tags: ['Python', 'IA', 'SQL', 'CMS'],
-    url: '#',
-  },
-  {
-    name: 'Scraper con pipeline ETL',
-    description: 'Extrae, transforma y carga datos de fuentes públicas en base de datos relacional. Ejecutable vía cron en Linux.',
-    tags: ['PHP', 'SQL', 'Linux'],
-    url: '#',
-  },
-  {
-    name: 'Deploy con AWS + Docker',
-    description: 'Infraestructura con EC2, RDS y contenedores Docker. nginx como reverse proxy y CI/CD básico.',
-    tags: ['AWS', 'Docker', 'Linux', 'nginx'],
-    url: '#',
-  },
-];
+const experiences = experienceData.map(e => ({
+  role: e.role.es,
+  company: e.company.es,
+  date: e.date.es,
+  descriptions: e.descriptions.es,
+}));
 
-const education = [
-  {
-    degree: t('education.daw.degree'),
-    school: t('education.daw.school'),
-    date: t('education.daw.date'),
-    note: t('education.daw.note'),
-  },
-  {
-    degree: t('education.senati.degree'),
-    school: t('education.senati.school'),
-    date: t('education.senati.date'),
-  },
-];
-
-const stackItems = [
-  'Java', 'PHP / Laravel', 'SQL (MySQL / PG)', 'Docker',
-  'AWS (EC2, RDS)', 'Linux', 'HTML · CSS · JS', 'WordPress',
-  'Git / GitHub', 'Python (IA/ML)',
-];
-
-const softSkills = [
-  'Resolución de problemas',
-  'Proactividad',
-  'Trabajo en equipo',
-  'Adaptabilidad',
-  'Gestión del tiempo',
-  'Pensamiento crítico',
-];
-
-const posts = [
-  {
-    slug: 'ia-catalogacion-imagenes',
-    title: 'Catalogación automática de imágenes con IA: de la idea a producción',
-    date: '2026-04-20',
-    readTime: 7,
-  },
-  {
-    slug: 'docker-para-desarrolladores',
-    title: 'Docker para desarrolladores backend: del cero al contenedor',
-    date: '2025-11-15',
-    readTime: 7,
-  },
-  {
-    slug: 'api-rest-laravel',
-    title: 'Cómo estructurar una API REST en Laravel desde cero',
-    date: '2025-05-10',
-    readTime: 5,
-  },
-];
+const projects = projectData.map(p => ({
+  name: p.name.es,
+  description: p.description.es,
+  tags: p.tags,
+  url: `/proyectos/${p.slug}/`,
+  status: p.status,
+  statusLabel: t(`projects.status.${p.status}`),
+}));
 
 const canonicalURL = 'https://soyaurelio.dev/';
 ---
@@ -126,11 +41,16 @@ const canonicalURL = 'https://soyaurelio.dev/';
   description={t('site.description')}
   canonicalURL={canonicalURL}
   currentLocale={lang}
+  altLangPath={altEnPath}
 >
   <Hero
     greeting={t('hero.greeting')}
     bioLine1={t('hero.bio.line1')}
-    bioLine2={t('hero.bio.line2')}
+    cvPreviewText={t('cv.preview')}
+    cvDownloadText={t('cv.download')}
+    cvCloseText={t('cv.close')}
+    cvFormatText={t('cv.format')}
+    lang={lang}
   />
 
   <Experience title={t('experience.title')} entries={experiences} />
@@ -139,9 +59,9 @@ const canonicalURL = 'https://soyaurelio.dev/';
     title={t('projects.title')}
     description={t('projects.description')}
     projects={projects}
+    allHref="/proyectos/"
+    allText={t('projects.all')}
   />
-
-  <Education title={t('education.title')} entries={education} />
 
   <Stack
     title={t('stack.title')}
@@ -149,40 +69,12 @@ const canonicalURL = 'https://soyaurelio.dev/';
     items={stackItems}
   />
 
-  <Skills
-    title={t('skills.title')}
-    description={t('skills.description')}
-    items={softSkills}
-  />
-
-  <Posts
-    title={t('writings.title')}
-    description={t('writings.description')}
-    allText={t('writings.all')}
-    readTimeSuffix={t('writings.readTime')}
-    posts={posts}
-    lang={lang}
-  />
-
-  <Contact
-    title={t('contact.title')}
-    description={t('contact.description')}
-    orText={t('contact.or')}
-    emailText={t('contact.email')}
-    lang={lang}
-  />
-
-  <section class="opacity-0 flex flex-col justify-center items-center mt-20">
-    <h2 class="text-text font-normal text-[14px] italic">{t('quote.text')}</h2>
-    <p class="text-gray font-normal text-[12px] mt-2 tooltip" data-tooltip={t('quote.tooltip')}>
-      {t('quote.author')}
-    </p>
-  </section>
-
-  <Footer
+  <Footer slot="footer"
     themeLabel={t('footer.theme')}
     themeTooltip={t('footer.themeTooltip')}
     versionTooltip={t('footer.versionTooltip')}
     lang={lang}
+    esPath={altEsPath}
+    enPath={altEnPath}
   />
 </Layout>

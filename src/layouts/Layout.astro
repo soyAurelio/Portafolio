@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { author } from '../data/author';
 
 export interface Props {
   title: string;
@@ -7,6 +8,7 @@ export interface Props {
   ogImage?: string;
   canonicalURL: string;
   currentLocale: string;
+  altLangPath?: string;
 }
 
 const {
@@ -15,26 +17,24 @@ const {
   ogImage = '/og/home.png',
   canonicalURL,
   currentLocale,
+  altLangPath,
 } = Astro.props;
 
 const altLocale = currentLocale === 'es' ? 'en' : 'es';
-const altPath = currentLocale === 'es' ? '/en/' : '/';
-const siteUrl = 'https://soyaurelio.dev';
-const author = 'Marco Aurelio';
+const altPath = altLangPath ?? (currentLocale === 'es' ? '/en/' : '/');
+const siteUrl = author.site;
 
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Person',
-  name: author,
+  name: author.name,
   url: siteUrl,
   sameAs: [
-    'https://github.com/soyAurelio',
-    'https://linkedin.com/in/',
+    author.github,
+    author.linkedin,
   ],
-  jobTitle: 'Backend Developer',
-  description: currentLocale === 'es'
-    ? 'Backend developer especializado en APIs, automatización, IA aplicada y arquitectura de sistemas.'
-    : 'Backend developer specialized in APIs, automation, applied AI, and systems architecture.',
+  jobTitle: author.role[currentLocale as 'es' | 'en'],
+  description: author.tagline[currentLocale as 'es' | 'en'],
   knowsAbout: [
     'Java', 'PHP', 'Laravel', 'SQL', 'Docker', 'AWS', 'Linux',
     'WordPress', 'Python', 'Artificial Intelligence', 'API Architecture',
@@ -53,7 +53,7 @@ const jsonLd = {
 ---
 
 <!doctype html>
-<html lang={currentLocale} class="w-full h-full flex sm:justify-center">
+<html lang={currentLocale}>
   <head>
     <!-- Theme detection (blocking, before paint) -->
     <script is:inline>
@@ -67,14 +67,13 @@ const jsonLd = {
     <!-- Global Metadata -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" href="/images/profile.png" />
     <meta name="generator" content={Astro.generator} />
 
     <!-- Canonical URL -->
     <link rel="canonical" href={canonicalURL} />
-    <link rel="alternate" hreflang={currentLocale} href={canonicalURL} />
-    <link rel="alternate" hreflang={altLocale} href={siteUrl + altPath} />
+    <link rel="alternate" hreflang={currentLocale === 'es' ? 'es-ES' : 'en-US'} href={canonicalURL} />
+    <link rel="alternate" hreflang={altLocale === 'es' ? 'es-ES' : 'en-US'} href={siteUrl + altPath} />
     <link rel="alternate" hreflang="x-default" href={siteUrl + '/'} />
 
     <!-- Title & Description -->
@@ -89,7 +88,10 @@ const jsonLd = {
     <meta property="og:description" content={description} />
     <meta property="og:image" content={siteUrl + ogImage} />
     <meta property="og:image:secure_url" content={siteUrl + ogImage} />
-    <meta name="author" content={author} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="634" />
+    <meta property="og:image:alt" content={title} />
+    <meta name="author" content={author.name} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -97,25 +99,43 @@ const jsonLd = {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={siteUrl + ogImage} />
+    <meta name="twitter:image:alt" content={title} />
 
     <!-- JSON-LD Structured Data -->
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
 
     <!-- Sitemap -->
     <link rel="sitemap" href="/sitemap-index.xml" />
   </head>
 
-  <body
-    class="text-text bg-bg font-inter flex flex-col max-w-[550px] w-full h-full px-4 md:px-0"
-  >
+  <body class="text-text bg-bg font-inter flex flex-col max-w-137.5 w-full px-4 md:px-0 mx-auto min-h-screen overflow-x-hidden">
     <main class="grow">
       <slot />
     </main>
 
+    <slot name="footer" />
+
+    <!-- Lenis smooth scroll -->
+    <script>
+      import Lenis from 'lenis';
+
+      const lenis = new Lenis({
+        lerp: 0.06,
+        smoothWheel: true,
+      });
+
+      function raf(time: number) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+    </script>
+
     <!-- Section entrance animation -->
     <script>
       addEventListener('load', () => {
-        document.querySelectorAll('section').forEach((el, i) => {
+        const sections = document.querySelectorAll('section');
+        sections.forEach((el, i) => {
           el.animate(
             {
               opacity: [0, 1],
@@ -142,7 +162,24 @@ const jsonLd = {
             {
               duration: 700,
               easing: 'ease-out',
-              delay: document.querySelectorAll('section').length * 300,
+              delay: sections.length * 300,
+              fill: 'forwards',
+            }
+          );
+        }
+
+        const footer = document.querySelector('footer');
+        if (footer) {
+          footer.animate(
+            {
+              opacity: [0, 1],
+              transform: ['translateY(40px)', 'translateY(0)'],
+              filter: ['blur(20px)', 'blur(0)'],
+            },
+            {
+              duration: 700,
+              easing: 'ease-out',
+              delay: (sections.length + 1) * 300,
               fill: 'forwards',
             }
           );
@@ -153,7 +190,8 @@ const jsonLd = {
     <!-- Click ripple effect -->
     <script>
       addEventListener('click', (e) => {
-        if (e.target.closest('a, button')) return;
+        const target = e.target as Element;
+        if (target.closest('a, button')) return;
         const div = document.createElement('div');
         div.style.cssText = `
           position: fixed;

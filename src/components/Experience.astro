@@ -14,7 +14,7 @@ export interface Props {
 const { title, entries } = Astro.props;
 ---
 
-<section id="experience" class="opacity-0 mt-14">
+<section id="experience" class="opacity-0 mt-10">
   <h2 class="text-text font-semibold text-[14px]">{title}</h2>
 
   <div class="mt-4 space-y-8">
@@ -27,8 +27,8 @@ const { title, entries } = Astro.props;
         <p class="text-gray font-normal text-[11px] mt-0.5">{entry.company}</p>
         <ul class="mt-2 space-y-1">
           {entry.descriptions.map((desc) => (
-            <li class="text-gray font-normal text-[12px] leading-[18px] flex gap-2">
-              <span class="text-border shrink-0 mt-[6px] block w-1 h-1 rounded-full bg-gray"></span>
+            <li class="text-gray font-normal text-[12px] leading-4.5 flex gap-2">
+              <span class="text-border shrink-0 mt-1.5 block w-1 h-1 rounded-full bg-gray"></span>
               <span>{desc}</span>
             </li>
           ))}

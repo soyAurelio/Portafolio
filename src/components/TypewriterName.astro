@@ -48,7 +48,7 @@ const cId = `tw-${scopeId}-cursor`;
   }
 </style>
 
-<script define:vars={{ dId, names, typeSpeed, deleteSpeed, pauseShort, pauseLong, startDelay }}>
+<script is:inline define:vars={{ dId, names, typeSpeed, deleteSpeed, pauseShort, pauseLong, startDelay }}>
   (function() {
     const dynamic = document.getElementById(dId);
     if (!dynamic) return;
@@ -56,7 +56,6 @@ const cId = `tw-${scopeId}-cursor`;
     let nameIndex = 0;
     let charIndex = 0;
     let isDeleting = false;
-    let timeout;
 
     function tick() {
       const currentName = names[nameIndex];
@@ -67,7 +66,7 @@ const cId = `tw-${scopeId}-cursor`;
 
         if (charIndex === currentName.length) {
           const pause = nameIndex === names.length - 1 ? pauseLong : pauseShort;
-          timeout = setTimeout(() => {
+          setTimeout(() => {
             isDeleting = true;
             tick();
           }, pause);
@@ -80,16 +79,16 @@ const cId = `tw-${scopeId}-cursor`;
         if (charIndex === 0) {
           isDeleting = false;
           nameIndex = (nameIndex + 1) % names.length;
-          timeout = setTimeout(tick, 200);
+          setTimeout(tick, 200);
           return;
         }
       }
 
       const speed = isDeleting ? deleteSpeed : typeSpeed;
       const jitter = Math.random() * 40 - 20;
-      timeout = setTimeout(tick, speed + jitter);
+      setTimeout(tick, speed + jitter);
     }
 
-    timeout = setTimeout(tick, startDelay);
+    setTimeout(tick, startDelay);
   })();
 </script>

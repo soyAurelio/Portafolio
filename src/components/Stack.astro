@@ -1,4 +1,6 @@
 ---
+import MarqueeTrack from './MarqueeTrack.astro';
+
 export interface Props {
   title: string;
   description: string;
@@ -8,7 +10,7 @@ export interface Props {
 const { title, description, items } = Astro.props;
 ---
 
-<section id="stack" class="opacity-0 mt-14">
+<section id="stack" class="opacity-0 mt-10 mb-12 sm:mb-16">
   <div class="flex items-center space-x-1">
     <h2 class="text-text font-semibold text-[14px]">
       {title}
@@ -17,11 +19,14 @@ const { title, description, items } = Astro.props;
   <p class="text-gray font-normal text-[12px]">
     {description}
   </p>
-  <div class="flex flex-wrap gap-2 mt-4">
-    {items.map((item) => (
-      <span class="border border-border px-3 py-[2px] rounded-md text-[12px] text-text font-normal">
-        {item}
-      </span>
-    ))}
+  <div class="mt-4">
+    <MarqueeTrack
+      items={items}
+      rows={2}
+      speed={40}
+      autoPlay={true}
+      draggable={false}
+      itemClass="border border-border px-3 py-0.5 rounded-md text-[12px] text-text font-normal whitespace-nowrap"
+    />
   </div>
 </section>

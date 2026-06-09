@@ -1,28 +1,79 @@
 ---
 import TypewriterName from './TypewriterName.astro';
+import CvDownload from './CvDownload.astro';
+import { author } from '../data/author';
 
 export interface Props {
   greeting: string;
   bioLine1: string;
-  bioLine2: string;
+  cvPreviewText: string;
+  cvDownloadText: string;
+  cvCloseText: string;
+  cvFormatText: string;
+  lang: string;
 }
 
-const { greeting, bioLine1, bioLine2 } = Astro.props;
+const {
+  greeting,
+  bioLine1,
+  cvPreviewText,
+  cvDownloadText,
+  cvCloseText,
+  cvFormatText,
+  lang,
+} = Astro.props;
 ---
 
-<section id="hero" class="opacity-0 mt-36">
-  <!-- Profile picture -->
-  <img
-    src="/images/profile.svg"
-    alt="Marco Aurelio"
-    width="80"
-    height="80"
-    class="rounded-full mb-6 border border-border"
-    decoding="async"
-    loading="eager"
-  />
+<section id="hero" class="opacity-0 mt-24 sm:mt-36" data-lang={lang}>
+  <div class="flex flex-wrap items-end justify-between gap-3 sm:gap-8">
+    <!-- Profile picture -->
+    <img
+      id="profile-img"
+      src="/images/profile.png"
+      alt="Marco Aurelio"
+      width="160"
+      height="160"
+      class="w-20 h-20 rounded-full border border-border cursor-pointer transition-transform duration-200 hover:scale-95 active:scale-90 shrink-0"
+      decoding="async"
+      loading="eager"
+    />
 
-  <p class="text-text font-semibold text-[16px]">
+    <!-- Contact icons + CV -->
+    <div class="flex items-center gap-3">
+      <!-- GitHub -->
+      <a href={author.github} target="_blank" rel="noopener noreferrer" class="group" aria-label="GitHub">
+        <svg class="text-gray group-hover:text-text transition-colors" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+        </svg>
+      </a>
+      <!-- LinkedIn -->
+      <a href={author.linkedin} target="_blank" rel="noopener noreferrer" class="group" aria-label="LinkedIn">
+        <svg class="text-gray group-hover:text-text transition-colors" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+          <rect x="2" y="9" width="4" height="12"/>
+          <circle cx="4" cy="4" r="2"/>
+        </svg>
+      </a>
+      <!-- Email -->
+      <a href={`mailto:${author.email}`} class="group" aria-label={author.email}>
+        <svg class="text-gray group-hover:text-text transition-colors" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <path d="m22 4-10 8L2 4"/>
+        </svg>
+      </a>
+
+      <CvDownload
+        compact={true}
+        previewText={cvPreviewText}
+        downloadText={cvDownloadText}
+        closeText={cvCloseText}
+        formatText={cvFormatText}
+        lang={lang}
+      />
+    </div>
+  </div>
+
+  <p class="text-text font-semibold text-[16px] mt-5">
     <TypewriterName
       scopeId="hero"
       greeting={greeting}
@@ -30,10 +81,88 @@ const { greeting, bioLine1, bioLine2 } = Astro.props;
       names={["Antonio,", "Aurelio,"]}
     />
   </p>
+
   <p class="text-gray font-normal text-[12px] mt-3">
     {bioLine1}
   </p>
-  <p class="text-gray font-normal text-[12px] mt-3">
-    {bioLine2}
-  </p>
 </section>
+
+<script>
+  const profileImg = document.getElementById('profile-img') as HTMLImageElement | null;
+  if (!profileImg) throw new Error('Profile image not found');
+
+  let modal: HTMLDivElement | null = null;
+
+  function openModal() {
+    if (modal) return;
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
+    backdrop.style.cssText = 'background: rgba(0,0,0,0.5);';
+
+    const container = document.createElement('div');
+    container.className = 'relative bg-bg border border-border rounded-xl p-2 shadow-lg';
+    container.style.cssText = 'max-width: 288px; width: 90vw;';
+
+    const img = document.createElement('img');
+    img.src = profileImg!.src;
+    img.alt = profileImg!.alt;
+    img.className = 'w-full h-auto rounded-lg';
+    img.style.cssText = 'display: block;';
+
+    const hint = document.createElement('p');
+    hint.className = 'text-gray font-normal text-[10px] text-center mt-2';
+    const lang = document.getElementById('hero')?.dataset.lang || 'es';
+    hint.textContent = lang === 'en' ? '✕ click outside to close' : '✕ click fuera para cerrar';
+
+    container.appendChild(img);
+    container.appendChild(hint);
+    backdrop.appendChild(container);
+    document.body.appendChild(backdrop);
+
+    modal = backdrop;
+
+    container.animate(
+      { opacity: [0, 1], transform: ['scale(0.92)', 'scale(1)'] },
+      { duration: 200, easing: 'ease-out', fill: 'forwards' }
+    );
+    backdrop.animate(
+      { opacity: [0, 1] },
+      { duration: 150, easing: 'ease-out', fill: 'forwards' }
+    );
+
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) closeModal();
+    });
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeModal();
+    };
+    document.addEventListener('keydown', onKey);
+    (backdrop as any).__onKey = onKey;
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    const keyHandler = (modal as any).__onKey;
+    if (keyHandler) document.removeEventListener('keydown', keyHandler);
+
+    const container = modal.firstElementChild as HTMLElement;
+
+    Promise.all([
+      container.animate(
+        { opacity: [1, 0], transform: ['scale(1)', 'scale(0.92)'] },
+        { duration: 120, easing: 'ease-in', fill: 'forwards' }
+      ).finished,
+      modal.animate(
+        { opacity: [1, 0] },
+        { duration: 100, easing: 'ease-in', fill: 'forwards' }
+      ).finished,
+    ]).then(() => {
+      modal?.remove();
+      modal = null;
+    });
+  }
+
+  profileImg.addEventListener('click', openModal);
+</script>

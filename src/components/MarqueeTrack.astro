@@ -1,0 +1,254 @@
+---
+export interface Props {
+  items: string[];
+  speed?: number;
+  rows?: number;
+  itemClass?: string;
+  autoPlay?: boolean;
+  draggable?: boolean;
+}
+
+const {
+  items,
+  speed = 50,
+  rows = 1,
+  itemClass = '',
+  autoPlay = true,
+  draggable = false,
+} = Astro.props;
+
+const rowItems: string[][] = [];
+const perRow = Math.ceil(items.length / rows);
+for (let i = 0; i < rows; i++) {
+  rowItems.push(items.slice(i * perRow, (i + 1) * perRow));
+}
+---
+
+<div
+  class="marquee-container overflow-hidden px-2 select-none flex flex-col gap-y-2"
+  data-speed={speed}
+  data-autoplay={String(autoPlay)}
+  data-draggable={String(draggable)}
+  role="marquee"
+  aria-label="Scrolling items"
+>
+  {rowItems.map((row, ri) => (
+    <div
+      class={`marquee-row overflow-hidden ${draggable ? 'cursor-grab active:cursor-grabbing' : ''}`}
+      data-row={ri}
+    >
+      <div class="marquee-track flex gap-2 flex-nowrap" style="will-change:transform">
+        <ul class="marquee-segment flex gap-2 flex-nowrap list-none m-0 p-0">
+          {row.map((item) => (
+            <li class={itemClass}>{item}</li>
+          ))}
+        </ul>
+        <ul class="marquee-segment flex gap-2 flex-nowrap list-none m-0 p-0" aria-hidden="true">
+          {row.map((item) => (
+            <li class={itemClass}>{item}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  ))}
+</div>
+
+<script>
+  function initMarquee(container: HTMLElement) {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    const spx = Number(container.dataset.speed || 50) / 1000;
+    const doAutoPlay = container.dataset.autoplay !== 'false';
+    const doDrag = container.dataset.draggable === 'true';
+
+    const rows = container.querySelectorAll<HTMLElement>('.marquee-row');
+    if (rows.length === 0) return;
+
+    interface RowState {
+      track: HTMLElement;
+      resetPoint: number;
+      running: boolean;
+      offset: number;
+      lastTime: number;
+      dragging: boolean;
+      dragStart: number;
+      dragOffsetStart: number;
+    }
+
+    const states: RowState[] = [];
+
+    function buildRow(row: HTMLElement) {
+      const track = row.querySelector<HTMLElement>('.marquee-track')!;
+      const segment = track.firstElementChild as HTMLElement;
+      const rowWidth = row.offsetWidth;
+
+      // Ensure enough copies: ceil(rowWidth / segmentWidth) + 1
+      const needed = Math.ceil(rowWidth / segment.offsetWidth) + 1;
+      const existing = track.children.length;
+      for (let i = existing; i < needed; i++) {
+        const clone = segment.cloneNode(true) as HTMLElement;
+        clone.setAttribute('aria-hidden', 'true');
+        track.appendChild(clone);
+      }
+
+      // Find existing state for this row
+      const existingState = states.find(s => s.track === track);
+      if (existingState) return existingState;
+
+      const state: RowState = {
+        track,
+        resetPoint: 0, // calculated below
+        running: doAutoPlay,
+        offset: 0,
+        lastTime: 0,
+        dragging: false,
+        dragStart: 0,
+        dragOffsetStart: 0,
+      };
+      states.push(state);
+      return state;
+    }
+
+    function recalc() {
+      states.forEach(s => {
+        const track = s.track;
+        const firstSeg = track.children[0] as HTMLElement;
+        const secondSeg = track.children[1] as HTMLElement;
+        // resetPoint: distance from start of first segment to start of second
+        s.resetPoint = secondSeg.offsetLeft - firstSeg.offsetLeft;
+      });
+    }
+
+    // Initial build
+    rows.forEach(row => buildRow(row));
+    recalc();
+
+    // Recalculate on resize
+    const observer = new ResizeObserver(() => recalc());
+    rows.forEach(row => observer.observe(row));
+
+    let globalRaf = 0;
+
+    function tick(ts: number) {
+      let anyRunning = false;
+      states.forEach(s => {
+        if (!s.running || s.dragging) return;
+        anyRunning = true;
+        const dt = ts - s.lastTime;
+        s.offset -= spx * dt;
+        while (s.offset <= -s.resetPoint) s.offset += s.resetPoint;
+        while (s.offset > 0) s.offset -= s.resetPoint;
+        s.track.style.transform = `translateX(${s.offset}px)`;
+        s.lastTime = ts;
+      });
+      if (anyRunning) globalRaf = requestAnimationFrame(tick);
+    }
+
+    function startLoop() {
+      if (globalRaf) return;
+      const now = performance.now();
+      states.forEach(s => s.lastTime = now);
+      globalRaf = requestAnimationFrame(tick);
+    }
+
+    if (doAutoPlay) startLoop();
+
+    container.addEventListener('mouseenter', () => {
+      if (doAutoPlay) {
+        states.forEach(s => s.running = false);
+        cancelAnimationFrame(globalRaf);
+        globalRaf = 0;
+      } else {
+        states.forEach(s => s.running = true);
+        startLoop();
+      }
+    });
+
+    container.addEventListener('mouseleave', () => {
+      if (doAutoPlay) {
+        states.forEach(s => s.running = true);
+        startLoop();
+      } else {
+        states.forEach(s => s.running = false);
+        cancelAnimationFrame(globalRaf);
+        globalRaf = 0;
+        states.forEach(s => {
+          s.offset = 0;
+          s.track.style.transform = 'translateX(0)';
+        });
+      }
+    });
+
+    // Drag (only if enabled)
+    if (doDrag) {
+      let active: RowState | null = null;
+      let moveHandler: ((e: MouseEvent) => void) | null = null;
+      let upHandler: (() => void) | null = null;
+
+      function getRowAtY(y: number): RowState | null {
+        for (const s of states) {
+          const rect = s.track.parentElement!.getBoundingClientRect();
+          if (y >= rect.top && y <= rect.bottom) return s;
+        }
+        return null;
+      }
+
+      container.addEventListener('mousedown', (e) => {
+        active = getRowAtY(e.clientY);
+        if (!active) return;
+        active.dragging = true;
+        active.dragStart = e.clientX;
+        active.dragOffsetStart = active.offset;
+
+        moveHandler = (ev: MouseEvent) => {
+          if (!active || !active.dragging) return;
+          let n = active.dragOffsetStart + (ev.clientX - active.dragStart);
+          while (n > 0) n -= active.resetPoint;
+          while (n <= -active.resetPoint) n += active.resetPoint;
+          active.offset = n;
+          active.track.style.transform = `translateX(${n}px)`;
+        };
+
+        upHandler = () => {
+          if (active) active.dragging = false;
+          active = null;
+          if (moveHandler) window.removeEventListener('mousemove', moveHandler);
+          if (upHandler) window.removeEventListener('mouseup', upHandler);
+          moveHandler = null;
+          upHandler = null;
+        };
+
+        window.addEventListener('mousemove', moveHandler);
+        window.addEventListener('mouseup', upHandler);
+      });
+
+      // Touch
+      container.addEventListener('touchstart', (e) => {
+        active = getRowAtY(e.touches[0].clientY);
+        if (!active) return;
+        active.dragging = true;
+        active.dragStart = e.touches[0].clientX;
+        active.dragOffsetStart = active.offset;
+      }, { passive: true });
+
+      container.addEventListener('touchmove', (e) => {
+        if (!active || !active.dragging) return;
+        let n = active.dragOffsetStart + (e.touches[0].clientX - active.dragStart);
+        while (n > 0) n -= active.resetPoint;
+        while (n <= -active.resetPoint) n += active.resetPoint;
+        active.offset = n;
+        active.track.style.transform = `translateX(${n}px)`;
+      }, { passive: true });
+
+      container.addEventListener('touchend', () => {
+        if (active) active.dragging = false;
+        active = null;
+      });
+    }
+  }
+
+  document.fonts.ready.then(() => {
+    document.querySelectorAll('.marquee-container').forEach(c => initMarquee(c as HTMLElement));
+  });
+</script>

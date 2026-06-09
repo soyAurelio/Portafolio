@@ -10,27 +10,15 @@ const { currentLang, esPath = '/', enPath = '/en/' } = Astro.props;
 ---
 
 <span class="inline-flex items-center space-x-1">
-  <a
-    href={esPath}
-    hreflang="es"
-    class={currentLang === 'es'
-      ? 'text-text text-[12px]'
-      : 'text-gray hover:text-text text-[12px] tooltip'}
-    data-tooltip="Español"
-    aria-current={currentLang === 'es' ? 'page' : undefined}
-  >
-    ES
-  </a>
+  {currentLang === 'es' ? (
+    <span class="text-text text-[12px]" aria-current="page">ES</span>
+  ) : (
+    <a href={esPath} hreflang="es-ES" class="text-gray hover:text-text text-[12px] tooltip" data-tooltip="Español">ES</a>
+  )}
   <span class="text-gray text-[10px] select-none" aria-hidden="true">·</span>
-  <a
-    href={enPath}
-    hreflang="en"
-    class={currentLang === 'en'
-      ? 'text-text text-[12px]'
-      : 'text-gray hover:text-text text-[12px] tooltip'}
-    data-tooltip="English"
-    aria-current={currentLang === 'en' ? 'page' : undefined}
-  >
-    EN
-  </a>
+  {currentLang === 'en' ? (
+    <span class="text-text text-[12px]" aria-current="page">EN</span>
+  ) : (
+    <a href={enPath} hreflang="en-US" class="text-gray hover:text-text text-[12px] tooltip" data-tooltip="English">EN</a>
+  )}
 </span>

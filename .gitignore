@@ -25,3 +25,4 @@ pnpm-debug.log*
 
 # contenido de referencia (no es parte del proyecto)
 ejemplo/
+.atl/

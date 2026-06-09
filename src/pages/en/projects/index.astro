@@ -1,0 +1,109 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Footer from '../../../components/Footer.astro';
+import { projects } from '../../../data/projects';
+import { useTranslations, getLangFromUrl, getAltPath } from '../../../i18n/utils';
+
+const url = new URL(Astro.request.url);
+const lang = getLangFromUrl(url);
+const t = useTranslations(lang);
+
+const altEsPath = getAltPath(url, lang, 'es');
+const altEnPath = getAltPath(url, lang, 'en');
+
+const title = 'Projects — Marco Aurelio';
+const canonicalURL = 'https://soyaurelio.dev/en/projects/';
+const ogImage = '/og/projects.png';
+
+const allProjects = projects;
+---
+
+<Layout
+  title={title}
+  description={t('projects.description')}
+  ogImage={ogImage}
+  canonicalURL={canonicalURL}
+  currentLocale={lang}
+  altLangPath={altEsPath}
+>
+  <div class="pt-20 sm:pt-28">
+    <section id="projects" class="opacity-0">
+      <a href="/en/" class="group inline-flex items-center space-x-1">
+        <svg
+          class="text-gray group-hover:text-text"
+          width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        >
+          <line x1="17" y1="17" x2="7" y2="7"></line>
+          <polyline points="7 17 7 7 17 7"></polyline>
+        </svg>
+        <p class="text-gray group-hover:text-text text-end font-normal text-[12px]">
+          {t('nav.home')}
+        </p>
+      </a>
+
+      <h2 class="text-text font-semibold text-[14px] mt-8">
+        {t('projects.title')}
+      </h2>
+      <p class="text-gray font-normal text-[12px]">
+        {t('projects.description')}
+      </p>
+
+      <ul class="project-grid grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+        {allProjects.map((p) => (
+          <li class="project-card border-border border rounded-md p-6 w-full hover:scale-[0.98] transform-gpu antialiased">
+            <a href={`/en/projects/${p.slug}/`} class="flex flex-col h-full">
+              <div class="flex items-center justify-between space-x-1 shrink-0">
+                <div class="flex items-center gap-2 min-w-0">
+                  <h4 class="text-text font-semibold text-[14px] truncate">{p.name.en}</h4>
+                  <span class={`shrink-0 border px-1.5 py-px rounded-md text-[10px] leading-normal ${
+                    p.status === 'completed' ? 'border-emerald-500/40 text-emerald-600 dark:text-emerald-400' :
+                    p.status === 'in-progress' ? 'border-amber-500/40 text-amber-600 dark:text-amber-400' :
+                    'border-gray-400/40 text-gray-500'
+                  }`}>
+                    {t(`projects.status.${p.status}`)}
+                  </span>
+                </div>
+                <svg class="text-gray shrink-0" width="16" height="16" viewBox="0 0 16 16"
+                  fill="none" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="4.5" y1="11.5" x2="11.5" y2="4.5"></line>
+                  <polyline points="4.5 4.5 11.5 4.5 11.5 11.5"></polyline>
+                </svg>
+              </div>
+              <div class="project-desc-clamp overflow-hidden mt-1">
+                <p class="project-desc-inner text-gray font-normal text-[12px] whitespace-nowrap">
+                  {p.description.en}
+                </p>
+              </div>
+              <div class="project-tags-row flex gap-2 mt-auto pt-2 flex-nowrap overflow-hidden pb-0.5">
+                <div class="flex gap-2 flex-nowrap">
+                  {p.tags.map((tag) => (
+                    <span class="border border-border px-2 py-0.5 rounded-md text-[11px] text-gray shrink-0">{tag}</span>
+                  ))}
+                </div>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+  </div>
+
+  <Footer slot="footer"
+    themeLabel={t('footer.theme')}
+    themeTooltip={t('footer.themeTooltip')}
+    versionTooltip={t('footer.versionTooltip')}
+    lang={lang}
+    esPath={altEsPath}
+    enPath={altEnPath}
+  />
+
+  <script is:inline src="/scripts/project-marquee.js"></script>
+<style>
+  .project-grid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+</style>
+</Layout>

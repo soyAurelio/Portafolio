@@ -3,120 +3,35 @@ import Layout from '../../layouts/Layout.astro';
 import Hero from '../../components/Hero.astro';
 import Experience from '../../components/Experience.astro';
 import Projects from '../../components/Projects.astro';
-import Education from '../../components/Education.astro';
 import Stack from '../../components/Stack.astro';
-import Skills from '../../components/Skills.astro';
-import Posts from '../../components/Posts.astro';
-import Contact from '../../components/Contact.astro';
 import Footer from '../../components/Footer.astro';
-import { useTranslations, getLangFromUrl } from '../../i18n/utils';
+import { useTranslations, getLangFromUrl, getAltPath } from '../../i18n/utils';
+import { projects as projectData } from '../../data/projects';
+import { stackItems } from '../../data/stack';
+import { experiences as experienceData } from '../../data/experience';
 
 const url = new URL(Astro.request.url);
 const lang = getLangFromUrl(url);
 const t = useTranslations(lang);
 
-const experiences = [
-  {
-    role: t('experience.esort.role'),
-    company: t('experience.esort.company'),
-    date: t('experience.esort.date'),
-    descriptions: [
-      t('experience.esort.desc1'),
-      t('experience.esort.desc2'),
-      t('experience.esort.desc3'),
-      t('experience.esort.desc4'),
-      t('experience.esort.desc5'),
-    ],
-  },
-  {
-    role: t('experience.bodegas.role'),
-    company: t('experience.bodegas.company'),
-    date: t('experience.bodegas.date'),
-    descriptions: [
-      t('experience.bodegas.desc1'),
-      t('experience.bodegas.desc2'),
-      t('experience.bodegas.desc3'),
-      t('experience.bodegas.desc4'),
-    ],
-  },
-];
+const altEsPath = getAltPath(url, lang, 'es');
+const altEnPath = getAltPath(url, lang, 'en');
 
-const projects = [
-  {
-    name: 'Task REST API',
-    description: 'API with JWT authentication, model relationships, and Docker deployment. Full backend app lifecycle in production.',
-    tags: ['Laravel', 'PHP', 'MySQL', 'Docker'],
-    url: '#',
-  },
-  {
-    name: 'AI Image Cataloging',
-    description: 'Automatic image classification system using AI. Semantic tagging and visual content-based search.',
-    tags: ['Python', 'AI', 'SQL', 'CMS'],
-    url: '#',
-  },
-  {
-    name: 'ETL Scraper Pipeline',
-    description: 'Extracts, transforms, and loads data from public sources into a relational database. Runnable via cron on Linux.',
-    tags: ['PHP', 'SQL', 'Linux'],
-    url: '#',
-  },
-  {
-    name: 'AWS + Docker Deploy',
-    description: 'Infrastructure with EC2, RDS, and Docker containers. nginx reverse proxy and basic CI/CD.',
-    tags: ['AWS', 'Docker', 'Linux', 'nginx'],
-    url: '#',
-  },
-];
+const experiences = experienceData.map(e => ({
+  role: e.role.en,
+  company: e.company.en,
+  date: e.date.en,
+  descriptions: e.descriptions.en,
+}));
 
-const education = [
-  {
-    degree: t('education.daw.degree'),
-    school: t('education.daw.school'),
-    date: t('education.daw.date'),
-    note: t('education.daw.note'),
-  },
-  {
-    degree: t('education.senati.degree'),
-    school: t('education.senati.school'),
-    date: t('education.senati.date'),
-  },
-];
-
-const stackItems = [
-  'Java', 'PHP / Laravel', 'SQL (MySQL / PG)', 'Docker',
-  'AWS (EC2, RDS)', 'Linux', 'HTML · CSS · JS', 'WordPress',
-  'Git / GitHub', 'Python (AI/ML)',
-];
-
-const softSkills = [
-  'Problem solving',
-  'Proactivity',
-  'Teamwork',
-  'Adaptability',
-  'Time management',
-  'Critical thinking',
-];
-
-const posts = [
-  {
-    slug: 'ai-image-cataloging',
-    title: 'AI-powered image cataloging: from idea to production',
-    date: '2026-04-20',
-    readTime: 7,
-  },
-  {
-    slug: 'docker-for-backend-devs',
-    title: 'Docker for backend developers: from zero to container',
-    date: '2025-11-15',
-    readTime: 7,
-  },
-  {
-    slug: 'structuring-laravel-rest-api',
-    title: 'How to structure a REST API in Laravel from scratch',
-    date: '2025-05-10',
-    readTime: 5,
-  },
-];
+const projects = projectData.map(p => ({
+  name: p.name.en,
+  description: p.description.en,
+  tags: p.tags,
+  url: `/en/projects/${p.slug}/`,
+  status: p.status,
+  statusLabel: t(`projects.status.${p.status}`),
+}));
 
 const canonicalURL = 'https://soyaurelio.dev/en/';
 ---
@@ -126,11 +41,16 @@ const canonicalURL = 'https://soyaurelio.dev/en/';
   description={t('site.description')}
   canonicalURL={canonicalURL}
   currentLocale={lang}
+  altLangPath={altEsPath}
 >
   <Hero
     greeting={t('hero.greeting')}
     bioLine1={t('hero.bio.line1')}
-    bioLine2={t('hero.bio.line2')}
+    cvPreviewText={t('cv.preview')}
+    cvDownloadText={t('cv.download')}
+    cvCloseText={t('cv.close')}
+    cvFormatText={t('cv.format')}
+    lang={lang}
   />
 
   <Experience title={t('experience.title')} entries={experiences} />
@@ -139,9 +59,9 @@ const canonicalURL = 'https://soyaurelio.dev/en/';
     title={t('projects.title')}
     description={t('projects.description')}
     projects={projects}
+    allHref="/en/projects/"
+    allText={t('projects.all')}
   />
-
-  <Education title={t('education.title')} entries={education} />
 
   <Stack
     title={t('stack.title')}
@@ -149,40 +69,12 @@ const canonicalURL = 'https://soyaurelio.dev/en/';
     items={stackItems}
   />
 
-  <Skills
-    title={t('skills.title')}
-    description={t('skills.description')}
-    items={softSkills}
-  />
-
-  <Posts
-    title={t('writings.title')}
-    description={t('writings.description')}
-    allText={t('writings.all')}
-    readTimeSuffix={t('writings.readTime')}
-    posts={posts}
-    lang={lang}
-  />
-
-  <Contact
-    title={t('contact.title')}
-    description={t('contact.description')}
-    orText={t('contact.or')}
-    emailText={t('contact.email')}
-    lang={lang}
-  />
-
-  <section class="opacity-0 flex flex-col justify-center items-center mt-20">
-    <h2 class="text-text font-normal text-[14px] italic">{t('quote.text')}</h2>
-    <p class="text-gray font-normal text-[12px] mt-2 tooltip" data-tooltip={t('quote.tooltip')}>
-      {t('quote.author')}
-    </p>
-  </section>
-
-  <Footer
+  <Footer slot="footer"
     themeLabel={t('footer.theme')}
     themeTooltip={t('footer.themeTooltip')}
     versionTooltip={t('footer.versionTooltip')}
     lang={lang}
+    esPath={altEsPath}
+    enPath={altEnPath}
   />
 </Layout>

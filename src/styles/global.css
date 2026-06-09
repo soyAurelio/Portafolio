@@ -60,6 +60,10 @@
 
 /* ── Base Layer ── */
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     font-family: var(--font-inter);
     font-size: 12px;
@@ -118,10 +122,6 @@
 
   .tooltip:hover::after {
     opacity: 1;
-  }
-
-  .section-enter {
-    opacity: 0;
   }
 }
 

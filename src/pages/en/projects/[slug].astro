@@ -1,0 +1,108 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Footer from '../../../components/Footer.astro';
+import { projects } from '../../../data/projects';
+import { useTranslations, getLangFromUrl, getAltPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  return projects.map((p) => ({ params: { slug: p.slug } }));
+}
+
+const url = new URL(Astro.request.url);
+const lang = getLangFromUrl(url);
+const t = useTranslations(lang);
+
+const altEsPath = getAltPath(url, lang, 'es');
+const altEnPath = getAltPath(url, lang, 'en');
+
+const { slug } = Astro.params;
+const project = projects.find((p) => p.slug === slug);
+
+if (!project) {
+  return Astro.redirect('/en/projects/');
+}
+
+const title = `${project.name.en} — Marco Aurelio`;
+const canonicalURL = `https://soyaurelio.dev/en/projects/${slug}/`;
+const ogImage = '/og/projects.png';
+---
+
+<Layout
+  title={title}
+  description={project.description.en}
+  ogImage={ogImage}
+  canonicalURL={canonicalURL}
+  currentLocale={lang}
+  altLangPath={altEsPath}
+>
+  <div class="pt-20 sm:pt-28">
+    <section id="project-detail" class="opacity-0">
+      <a href="/en/projects/" class="group inline-flex items-center space-x-1">
+        <svg
+          class="text-gray group-hover:text-text"
+          width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        >
+          <line x1="17" y1="17" x2="7" y2="7"></line>
+          <polyline points="7 17 7 7 17 7"></polyline>
+        </svg>
+        <p class="text-gray group-hover:text-text text-end font-normal text-[12px]">
+          {t('projects.title').toLowerCase()}
+        </p>
+      </a>
+
+      <h2 class="text-text font-semibold text-[14px] mt-8 flex items-center gap-2">
+        {project.name.en}
+        <span class={`border px-1.5 py-px rounded-md text-[10px] leading-normal font-normal ${
+          project.status === 'completed' ? 'border-emerald-500/40 text-emerald-600 dark:text-emerald-400' :
+          project.status === 'in-progress' ? 'border-amber-500/40 text-amber-600 dark:text-amber-400' :
+          'border-gray-400/40 text-gray-500'
+        }`}>
+          {t(`projects.status.${project.status}`)}
+        </span>
+      </h2>
+
+      <p class="text-gray font-normal text-[12px] mt-1 leading-relaxed">
+        {project.detail.en}
+      </p>
+
+      <div class="mt-6 text-[12px] text-gray space-y-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span>{t('projects.madeWith')}</span>
+          {project.tags.map((tag) => (
+            <span class="border border-border px-2 py-[2px] rounded-md text-gray">{tag}</span>
+          ))}
+        </div>
+
+        {project.github && (
+          <div class="flex items-center gap-2 flex-wrap">
+            <span>{t('projects.code')}</span>
+            <a target="_blank" href={project.github}
+              class="border border-border px-2 py-[2px] rounded-md text-gray hover:text-text">
+              github
+            </a>
+          </div>
+        )}
+
+        {project.live && (
+          <div class="flex items-center gap-2 flex-wrap">
+            <span>{t('projects.live')}</span>
+            <a target="_blank" href={project.live}
+              class="border border-border px-2 py-[2px] rounded-md text-gray hover:text-text">
+              demo
+            </a>
+          </div>
+        )}
+      </div>
+    </section>
+  </div>
+
+  <Footer slot="footer"
+    themeLabel={t('footer.theme')}
+    themeTooltip={t('footer.themeTooltip')}
+    versionTooltip={t('footer.versionTooltip')}
+    lang={lang}
+    esPath={altEsPath}
+    enPath={altEnPath}
+  />
+</Layout>

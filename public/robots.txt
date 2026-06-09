@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://soyaurelio.dev/sitemap.xml
+Sitemap: https://soyaurelio.dev/sitemap-index.xml
