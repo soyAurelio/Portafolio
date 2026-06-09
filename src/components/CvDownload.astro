@@ -119,16 +119,25 @@ const sectionClass = compact
       header.appendChild(titleEl);
       header.appendChild(headerActions);
 
-      var iframe = document.createElement('iframe');
-      iframe.src = cvPath + '#view=Fit';
-      iframe.className = 'w-full border-0';
-      iframe.style.cssText = isDesktop
+      // <embed> handles PDF preview better than <iframe> on mobile browsers
+      var viewer;
+      if (isDesktop) {
+        viewer = document.createElement('iframe');
+        viewer.src = cvPath + '#view=Fit';
+      } else {
+        // Mobile: embed has slightly better PDF support than iframe
+        viewer = document.createElement('embed');
+        viewer.src = cvPath + '#view=Fit';
+        viewer.setAttribute('type', 'application/pdf');
+      }
+      viewer.className = 'w-full border-0';
+      viewer.style.cssText = isDesktop
         ? 'flex: 1; min-height: 0; max-width: 100%; overflow: hidden;'
         : 'aspect-ratio: 1/1.414; max-width: 100%; overflow: hidden;';
-      iframe.setAttribute('title', 'CV Preview');
+      viewer.setAttribute('title', 'CV Preview');
 
       container.appendChild(header);
-      container.appendChild(iframe);
+      container.appendChild(viewer);
       backdrop.appendChild(container);
       document.body.appendChild(backdrop);
       document.body.style.overflow = 'hidden';
