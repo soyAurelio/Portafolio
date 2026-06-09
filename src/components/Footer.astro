@@ -12,7 +12,7 @@ export interface Props {
 }
 
 const { themeLabel, themeTooltip, versionTooltip, lang, esPath = '/', enPath = '/en/' } = Astro.props;
-const changelogPath = lang === 'es' ? '/changelog/' : '/en/changelog/';
+const changelogPath = lang === 'es' ? '/cambios/' : '/en/changelog/';
 ---
 
 <footer class="flex justify-between mt-10 pb-10 opacity-0 flex-wrap gap-y-3">

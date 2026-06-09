@@ -29,6 +29,7 @@ export function getAltPath(url: URL, currentLang: string, targetLang: string): s
     const segments = path.split('/').filter(Boolean);
     const translated = segments.map((seg) => {
       if (seg === 'proyectos') return 'projects';
+      if (seg === 'cambios') return 'changelog';
       return seg;
     });
     return '/' + ['en', ...translated].join('/') + '/';
@@ -39,6 +40,7 @@ export function getAltPath(url: URL, currentLang: string, targetLang: string): s
     const segments = withoutEn.split('/').filter(Boolean);
     const translated = segments.map((seg) => {
       if (seg === 'projects') return 'proyectos';
+      if (seg === 'changelog') return 'cambios';
       return seg;
     });
     return '/' + translated.join('/') + '/';
