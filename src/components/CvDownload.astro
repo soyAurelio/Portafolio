@@ -83,6 +83,7 @@ const sectionClass = compact
     var pdfPage = 1;
     var pdfRendering = false;
     var pdfPending = null;
+    var pdfjsModule = null; // cached PDF.js module reference
 
     btn.addEventListener('click', openModal);
 
@@ -178,9 +179,9 @@ const sectionClass = compact
     }
 
     function loadPdf(canvas, container) {
-      import('https://cdn.jsdelivr.net/npm/pdfjs-dist@6.0.227/build/pdf.min.mjs').then(function(m) {
-        m.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.0.227/build/pdf.worker.min.mjs';
-        m.getDocument({ url: cvPath }).promise.then(function(pdf) {
+      function init(pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.0.227/build/pdf.worker.min.mjs';
+        pdfjsLib.getDocument({ url: cvPath }).promise.then(function(pdf) {
           pdfDoc = pdf;
           document.getElementById('cv-modal-count').textContent = String(pdf.numPages);
           renderPage(canvas, container, 1);
@@ -196,6 +197,11 @@ const sectionClass = compact
             queueRender(canvas, container, pdfPage);
           });
         });
+      }
+      if (pdfjsModule) { init(pdfjsModule); return; }
+      import('https://cdn.jsdelivr.net/npm/pdfjs-dist@6.0.227/build/pdf.min.mjs').then(function(m) {
+        pdfjsModule = m;
+        init(m);
       });
     }
 

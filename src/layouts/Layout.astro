@@ -137,64 +137,59 @@ const jsonLd = {
     </script>
 
     <!-- Section entrance animation -->
-    <script is:inline>
-      (function run() {
-        if (document.readyState !== 'loading') return animate();
-        window.addEventListener('load', animate);
+    <script>
+      window.addEventListener('load', () => {
+        const sections = document.querySelectorAll('section');
+        sections.forEach((el, i) => {
+          el.animate(
+            {
+              opacity: [0, 1],
+              transform: ['translateY(40px)', 'translateY(0)'],
+              filter: ['blur(20px)', 'blur(0)'],
+            },
+            {
+              duration: 700,
+              easing: 'ease-out',
+              delay: i * 300,
+              fill: 'forwards',
+            }
+          );
+        });
 
-        function animate() {
-          const sections = document.querySelectorAll('section');
-          sections.forEach((el, i) => {
-            el.animate(
-              {
-                opacity: [0, 1],
-                transform: ['translateY(40px)', 'translateY(0)'],
-                filter: ['blur(20px)', 'blur(0)'],
-              },
-              {
-                duration: 700,
-                easing: 'ease-out',
-                delay: i * 300,
-                fill: 'forwards',
-              }
-            );
-          });
-
-          const aside = document.querySelector('aside');
-          if (aside) {
-            aside.animate(
-              {
-                opacity: [0, 1],
-                transform: ['translateY(40px)', 'translateY(0)'],
-                filter: ['blur(20px)', 'blur(0)'],
-              },
-              {
-                duration: 700,
-                easing: 'ease-out',
-                delay: sections.length * 300,
-                fill: 'forwards',
-              }
-            );
-          }
-
-          const footer = document.querySelector('footer');
-          if (footer) {
-            footer.animate(
-              {
-                opacity: [0, 1],
-                transform: ['translateY(40px)', 'translateY(0)'],
-                filter: ['blur(20px)', 'blur(0)'],
-              },
-              {
-                duration: 700,
-                easing: 'ease-out',
-                delay: (sections.length + 1) * 300,
-                fill: 'forwards',
-              }
-            );
-          }
+        const aside = document.querySelector('aside');
+        if (aside) {
+          aside.animate(
+            {
+              opacity: [0, 1],
+              transform: ['translateY(40px)', 'translateY(0)'],
+              filter: ['blur(20px)', 'blur(0)'],
+            },
+            {
+              duration: 700,
+              easing: 'ease-out',
+              delay: sections.length * 300,
+              fill: 'forwards',
+            }
+          );
         }
-      })();
+
+        const footer = document.querySelector('footer');
+        if (footer) {
+          footer.animate(
+            {
+              opacity: [0, 1],
+              transform: ['translateY(40px)', 'translateY(0)'],
+              filter: ['blur(20px)', 'blur(0)'],
+            },
+            {
+              duration: 700,
+              easing: 'ease-out',
+              delay: (sections.length + 1) * 300,
+              fill: 'forwards',
+            }
+          );
+        }
+      });
     </script>
 
     <!-- Click ripple effect -->
