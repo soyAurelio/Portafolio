@@ -107,6 +107,10 @@ const jsonLd = {
 
     <!-- Sitemap -->
     <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <!-- Preload PDF.js for fast CV preview -->
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/pdfjs-dist@6.0.227/build/pdf.min.mjs" />
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/pdfjs-dist@6.0.227/build/pdf.worker.min.mjs" />
   </head>
 
   <body class="text-text bg-bg font-inter flex flex-col max-w-137.5 w-full px-4 md:px-0 mx-auto min-h-screen">
@@ -133,9 +137,9 @@ const jsonLd = {
     </script>
 
     <!-- Section entrance animation -->
-    <script>
+    <script is:inline>
       (function run() {
-        if (document.readyState === 'complete') return animate();
+        if (document.readyState !== 'loading') return animate();
         window.addEventListener('load', animate);
 
         function animate() {
