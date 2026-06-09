@@ -26,6 +26,7 @@ for (let i = 0; i < rows; i++) {
 
 <div
   class="marquee-container overflow-hidden px-2 select-none flex flex-col gap-y-2"
+  style="overflow:hidden"
   data-speed={speed}
   data-autoplay={String(autoPlay)}
   data-draggable={String(draggable)}
@@ -35,6 +36,7 @@ for (let i = 0; i < rows; i++) {
   {rowItems.map((row, ri) => (
     <div
       class={`marquee-row overflow-hidden ${draggable ? 'cursor-grab active:cursor-grabbing' : ''}`}
+      style="overflow:hidden"
       data-row={ri}
     >
       <div class="marquee-track flex gap-2 flex-nowrap" style="will-change:transform">

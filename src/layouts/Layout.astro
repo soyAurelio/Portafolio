@@ -109,7 +109,7 @@ const jsonLd = {
     <link rel="sitemap" href="/sitemap-index.xml" />
   </head>
 
-  <body class="text-text bg-bg font-inter flex flex-col max-w-137.5 w-full px-4 md:px-0 mx-auto min-h-screen overflow-x-hidden">
+  <body class="text-text bg-bg font-inter flex flex-col max-w-137.5 w-full px-4 md:px-0 mx-auto min-h-screen">
     <main class="grow">
       <slot />
     </main>
@@ -134,7 +134,7 @@ const jsonLd = {
 
     <!-- Section entrance animation -->
     <script>
-      function animateSections() {
+      window.addEventListener('load', () => {
         const sections = document.querySelectorAll('section');
         sections.forEach((el, i) => {
           el.animate(
@@ -185,13 +185,7 @@ const jsonLd = {
             }
           );
         }
-      }
-
-      if (document.readyState === 'complete') {
-        animateSections();
-      } else {
-        addEventListener('load', animateSections);
-      }
+      });
     </script>
 
     <!-- Click ripple effect -->
