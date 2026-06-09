@@ -18,7 +18,7 @@ const {
   downloadText,
   closeText,
   formatText,
-  cvPath = '/images/cv.pdf',
+  cvPath = '/cv.pdf',
   compact = false,
 } = Astro.props;
 
@@ -76,6 +76,7 @@ const sectionClass = compact
     if (!btn) return;
 
     var cvPath = btn.getAttribute('data-cv-path') || '/cv.pdf';
+    var autoOpen = window.location.search.includes('cv') || window.location.hash === '#cv';
     var downloadText = btn.getAttribute('data-download-text') || 'Descargar';
     var closeText = btn.getAttribute('data-close-text') || 'Cerrar';
     var modal = null;
@@ -86,6 +87,10 @@ const sectionClass = compact
     var pdfjsModule = null; // cached PDF.js module reference
 
     btn.addEventListener('click', openModal);
+
+    if (autoOpen) {
+      setTimeout(function() { openModal(); }, 400);
+    }
 
     function openModal() {
       if (modal) return;

@@ -70,7 +70,7 @@ const ogImage = '/og/projects.png';
         <div class="flex items-center gap-2 flex-wrap">
           <span>{t('projects.madeWith')}</span>
           {project.tags.map((tag) => (
-            <span class="border border-border px-2 py-[2px] rounded-md text-gray">{tag}</span>
+            <span class="border border-border px-2 py-0.5 rounded-md text-gray">{tag}</span>
           ))}
         </div>
 
@@ -78,7 +78,7 @@ const ogImage = '/og/projects.png';
           <div class="flex items-center gap-2 flex-wrap">
             <span>{t('projects.code')}</span>
             <a target="_blank" href={project.github}
-              class="border border-border px-2 py-[2px] rounded-md text-gray hover:text-text">
+              class="border border-border px-2 py-0.5 rounded-md text-gray hover:text-text">
               github
             </a>
           </div>
@@ -88,7 +88,7 @@ const ogImage = '/og/projects.png';
           <div class="flex items-center gap-2 flex-wrap">
             <span>{t('projects.live')}</span>
             <a target="_blank" href={project.live}
-              class="border border-border px-2 py-[2px] rounded-md text-gray hover:text-text">
+              class="border border-border px-2 py-0.5 rounded-md text-gray hover:text-text">
               demo
             </a>
           </div>
