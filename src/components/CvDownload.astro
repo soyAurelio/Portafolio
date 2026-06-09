@@ -83,7 +83,7 @@ const sectionClass = compact
     btn.addEventListener('click', function() {
       var isDesktop = window.innerWidth >= 640;
       if (!isDesktop) {
-        window.open(cvPath, '_blank');
+        window.location.href = '/cv';
         return;
       }
       openModal();
