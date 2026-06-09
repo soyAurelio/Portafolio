@@ -1,0 +1,3 @@
+# Force PDFs to display inline (not download) for iframe/object preview
+/images/*
+  Content-Disposition: inline

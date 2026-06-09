@@ -78,22 +78,6 @@ const sectionClass = compact
     var cvPath = btn.getAttribute('data-cv-path') || '/cv.pdf';
     var downloadText = btn.getAttribute('data-download-text') || 'Descargar';
     var closeText = btn.getAttribute('data-close-text') || 'Cerrar';
-
-    // On touch devices, trigger direct download (PDF iframe doesn't work on mobile)
-    var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouch) {
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        var a = document.createElement('a');
-        a.href = cvPath;
-        a.download = '';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      });
-      return;
-    }
-
     var modal = null;
 
     btn.addEventListener('click', function() {
@@ -133,14 +117,23 @@ const sectionClass = compact
       header.appendChild(titleEl);
       header.appendChild(headerActions);
 
-      var iframe = document.createElement('iframe');
-      iframe.src = cvPath + '#view=Fit';
-      iframe.className = 'w-full border-0';
-      iframe.style.cssText = 'flex: 1; min-height: 0; max-width: 100%; overflow: hidden;';
-      iframe.setAttribute('title', 'CV Preview');
+      // <object> handles PDF preview better than <iframe> on mobile browsers
+      var viewer = document.createElement('object');
+      viewer.data = cvPath + '#view=Fit';
+      viewer.type = 'application/pdf';
+      viewer.className = 'w-full border-0';
+      viewer.style.cssText = 'flex: 1; min-height: 0; width: 100%;';
+      viewer.setAttribute('title', 'CV Preview');
+
+      // Fallback: shown when browser can't render PDF inline (e.g., old mobile browsers)
+      var fallback = document.createElement('div');
+      fallback.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:0.75rem;padding:2rem;text-align:center;';
+      fallback.innerHTML = '<p style="color:var(--text);font-size:13px;margin:0">' + downloadText + ' el CV para verlo</p>'
+        + '<a href="' + cvPath + '" download style="color:var(--text);font-size:14px;font-weight:600;text-decoration:underline">' + downloadText + '</a>';
+      viewer.appendChild(fallback);
 
       container.appendChild(header);
-      container.appendChild(iframe);
+      container.appendChild(viewer);
       backdrop.appendChild(container);
       document.body.appendChild(backdrop);
       document.body.style.overflow = 'hidden';
