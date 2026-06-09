@@ -79,18 +79,16 @@ const sectionClass = compact
     var downloadText = btn.getAttribute('data-download-text') || 'Descargar';
     var closeText = btn.getAttribute('data-close-text') || 'Cerrar';
     var modal = null;
+    var pdfDoc = null;
+    var pdfPage = 1;
+    var pdfRendering = false;
+    var pdfPending = null;
 
-    btn.addEventListener('click', function() {
-      var isDesktop = window.innerWidth >= 640;
-      if (!isDesktop) {
-        window.location.href = '/cv';
-        return;
-      }
-      openModal();
-    });
+    btn.addEventListener('click', openModal);
 
     function openModal() {
       if (modal) return;
+      var isDesktop = window.innerWidth >= 640;
 
       var backdrop = document.createElement('div');
       backdrop.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
@@ -98,7 +96,9 @@ const sectionClass = compact
 
       var container = document.createElement('div');
       container.className = 'relative bg-bg border border-border rounded-xl shadow-lg flex flex-col';
-      container.style.cssText = 'max-width: 850px; width: calc(100vw - 2rem); max-height: calc(100vh - 8rem); height: calc(100vh - 2rem); overflow: hidden;';
+      container.style.cssText = isDesktop
+        ? 'max-width: 850px; width: calc(100vw - 2rem); max-height: calc(100vh - 8rem); height: calc(100vh - 2rem); overflow: hidden;'
+        : 'max-width: 850px; width: calc(100vw - 1rem); max-height: calc(100vh - 4rem); overflow: hidden;';
 
       var header = document.createElement('div');
       header.className = 'flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 border-b border-border shrink-0';
@@ -127,18 +127,37 @@ const sectionClass = compact
       header.appendChild(titleEl);
       header.appendChild(headerActions);
 
-      var iframe = document.createElement('iframe');
-      iframe.src = cvPath + '#view=Fit';
-      iframe.className = 'w-full border-0';
-      iframe.style.cssText = 'flex: 1; min-height: 0; max-width: 100%; overflow: hidden;';
-      iframe.setAttribute('title', 'CV Preview');
-
       container.appendChild(header);
-      container.appendChild(iframe);
+
+      if (isDesktop) {
+        var iframe = document.createElement('iframe');
+        iframe.src = cvPath + '#view=Fit';
+        iframe.className = 'w-full border-0';
+        iframe.style.cssText = 'flex: 1; min-height: 0; max-width: 100%; overflow: hidden;';
+        iframe.setAttribute('title', 'CV Preview');
+        container.appendChild(iframe);
+      } else {
+        // Mobile: canvas + PDF.js
+        var canvas = document.createElement('canvas');
+        canvas.id = 'cv-modal-canvas';
+        canvas.className = 'block mx-auto';
+        canvas.style.cssText = 'max-width: 100%; height: auto;';
+        container.appendChild(canvas);
+
+        // Page nav below canvas
+        var nav = document.createElement('div');
+        nav.className = 'flex items-center justify-center gap-3 py-2 shrink-0';
+        nav.innerHTML = '<button id="cv-modal-prev" class="text-gray hover:text-text text-[18px] leading-none bg-transparent border-none p-1 cursor-pointer disabled:opacity-30">&larr;</button>'
+          + '<span class="text-gray text-[11px]"><span id="cv-modal-num">1</span>/<span id="cv-modal-count">-</span></span>'
+          + '<button id="cv-modal-next" class="text-gray hover:text-text text-[18px] leading-none bg-transparent border-none p-1 cursor-pointer disabled:opacity-30">&rarr;</button>';
+        container.appendChild(nav);
+
+        loadPdf(canvas, container);
+      }
+
       backdrop.appendChild(container);
       document.body.appendChild(backdrop);
       document.body.style.overflow = 'hidden';
-
       modal = backdrop;
 
       container.animate(
@@ -153,19 +172,76 @@ const sectionClass = compact
       backdrop.addEventListener('click', function(e) {
         if (e.target === backdrop) closeModal();
       });
-
-      function onKey(e) {
-        if (e.key === 'Escape') closeModal();
-      }
+      function onKey(e) { if (e.key === 'Escape') closeModal(); }
       document.addEventListener('keydown', onKey);
       backdrop.__onKey = onKey;
     }
 
+    function loadPdf(canvas, container) {
+      import('https://cdn.jsdelivr.net/npm/pdfjs-dist@6.0.227/build/pdf.min.mjs').then(function(m) {
+        m.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.0.227/build/pdf.worker.min.mjs';
+        m.getDocument({ url: cvPath }).promise.then(function(pdf) {
+          pdfDoc = pdf;
+          document.getElementById('cv-modal-count').textContent = String(pdf.numPages);
+          renderPage(canvas, container, 1);
+
+          document.getElementById('cv-modal-prev').addEventListener('click', function() {
+            if (pdfPage <= 1) return;
+            pdfPage--;
+            queueRender(canvas, container, pdfPage);
+          });
+          document.getElementById('cv-modal-next').addEventListener('click', function() {
+            if (pdfPage >= pdf.numPages) return;
+            pdfPage++;
+            queueRender(canvas, container, pdfPage);
+          });
+        });
+      });
+    }
+
+    function renderPage(canvas, container, num) {
+      pdfRendering = true;
+      pdfDoc.getPage(num).then(function(page) {
+        var pad = 32;
+        var cw = container.clientWidth - pad;
+        if (cw < 200) cw = container.clientWidth;
+        var vp = page.getViewport({ scale: 1 });
+        var scale = cw / vp.width;
+        var svp = page.getViewport({ scale: scale });
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(svp.width * dpr);
+        canvas.height = Math.floor(svp.height * dpr);
+        canvas.style.width = Math.floor(svp.width) + 'px';
+        canvas.style.height = Math.floor(svp.height) + 'px';
+        var ctx = canvas.getContext('2d');
+        var t = dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : null;
+        page.render({ canvasContext: ctx, transform: t, viewport: svp }).promise.then(function() {
+          pdfRendering = false;
+          if (pdfPending !== null) {
+            var p = pdfPending;
+            pdfPending = null;
+            renderPage(canvas, container, p);
+          }
+        });
+        document.getElementById('cv-modal-num').textContent = String(num);
+        var prev = document.getElementById('cv-modal-prev');
+        var next = document.getElementById('cv-modal-next');
+        prev.disabled = num <= 1;
+        next.disabled = num >= pdfDoc.numPages;
+      });
+    }
+
+    function queueRender(canvas, container, num) {
+      if (pdfRendering) { pdfPending = num; }
+      else { renderPage(canvas, container, num); }
+    }
+
     function closeModal() {
       if (!modal) return;
+      pdfDoc = null;
+      pdfPage = 1;
       var keyHandler = modal.__onKey;
       if (keyHandler) document.removeEventListener('keydown', keyHandler);
-
       var container = modal.firstElementChild;
       Promise.all([
         container.animate(
