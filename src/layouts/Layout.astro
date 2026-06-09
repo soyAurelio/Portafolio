@@ -137,8 +137,12 @@ const jsonLd = {
     </script>
 
     <!-- Section entrance animation -->
-    <script>
-      window.addEventListener('load', () => {
+    <script is:inline>
+      (function() {
+        if (document.readyState !== 'loading') return run();
+        window.addEventListener('load', run);
+
+        function run() {
         const sections = document.querySelectorAll('section');
         sections.forEach((el, i) => {
           el.animate(
@@ -189,7 +193,8 @@ const jsonLd = {
             }
           );
         }
-      });
+        }
+      })();
     </script>
 
     <!-- Click ripple effect -->
