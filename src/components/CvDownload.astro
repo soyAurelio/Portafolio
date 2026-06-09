@@ -81,6 +81,15 @@ const sectionClass = compact
     var modal = null;
 
     btn.addEventListener('click', function() {
+      var isDesktop = window.innerWidth >= 640;
+      if (!isDesktop) {
+        window.open(cvPath, '_blank');
+        return;
+      }
+      openModal();
+    });
+
+    function openModal() {
       if (modal) return;
 
       var backdrop = document.createElement('div');
@@ -89,9 +98,8 @@ const sectionClass = compact
 
       var container = document.createElement('div');
       container.className = 'relative bg-bg border border-border rounded-xl shadow-lg flex flex-col';
-      var isDesktop = window.innerWidth >= 640;
-      container.style.cssText = 'max-width: 850px; width: calc(100vw - 2rem); max-height: ' + (isDesktop ? 'calc(100vh - 8rem)' : '90vh') + '; overflow: hidden;'
-        + (isDesktop ? ' height: calc(100vh - 2rem);' : '');
+      container.style.cssText = 'max-width: 850px; width: calc(100vw - 2rem); height: calc(100vh - 2rem); overflow: hidden;';
+
       var header = document.createElement('div');
       header.className = 'flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 border-b border-border shrink-0';
 
@@ -119,25 +127,14 @@ const sectionClass = compact
       header.appendChild(titleEl);
       header.appendChild(headerActions);
 
-      // <embed> handles PDF preview better than <iframe> on mobile browsers
-      var viewer;
-      if (isDesktop) {
-        viewer = document.createElement('iframe');
-        viewer.src = cvPath + '#view=Fit';
-      } else {
-        // Mobile: embed has slightly better PDF support than iframe
-        viewer = document.createElement('embed');
-        viewer.src = cvPath + '#view=Fit';
-        viewer.setAttribute('type', 'application/pdf');
-      }
-      viewer.className = 'w-full border-0';
-      viewer.style.cssText = isDesktop
-        ? 'flex: 1; min-height: 0; max-width: 100%; overflow: hidden;'
-        : 'aspect-ratio: 1/1.414; max-width: 100%; overflow: hidden;';
-      viewer.setAttribute('title', 'CV Preview');
+      var iframe = document.createElement('iframe');
+      iframe.src = cvPath + '#view=Fit';
+      iframe.className = 'w-full border-0';
+      iframe.style.cssText = 'flex: 1; min-height: 0; max-width: 100%; overflow: hidden;';
+      iframe.setAttribute('title', 'CV Preview');
 
       container.appendChild(header);
-      container.appendChild(viewer);
+      container.appendChild(iframe);
       backdrop.appendChild(container);
       document.body.appendChild(backdrop);
       document.body.style.overflow = 'hidden';
@@ -162,7 +159,7 @@ const sectionClass = compact
       }
       document.addEventListener('keydown', onKey);
       backdrop.__onKey = onKey;
-    });
+    }
 
     function closeModal() {
       if (!modal) return;
